@@ -1,0 +1,24 @@
+# Ignore build artifacts
+dist/
+node_modules/
+dist/index.html
+
+# Ignore logs
+*.log
+
+# Ignore temporary files
+*.tmp
+.DS_Store
+
+# Ignore .vscode
+.vscode
+
+# Ignore node_modules
+node_modules
+
+# Ignore .vscode
+.vscode
+
+/DS_Store
+
+.env

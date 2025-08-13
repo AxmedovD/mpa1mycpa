@@ -27,7 +27,7 @@
           </tr>
         </thead>
         <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-          <tr v-for="offer in offers" :key="offer.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
+          <tr v-for="offer in offers" :key="offer.id" class="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer" @click="viewOfferDetails(offer, $event)">
             <td class="px-6 py-4 whitespace-nowrap">
               <div class="flex items-center">
                 <input
@@ -143,6 +143,7 @@
 
 <script setup>
 import { ref, computed, watch, defineProps, defineEmits } from 'vue'
+import { useRouter } from 'vue-router'
 
 const props = defineProps({
   offers: {
@@ -152,6 +153,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['edit', 'change-status', 'update:selected'])
+const router = useRouter()
 
 // Selected offers for bulk actions
 const selectedOffers = ref([])
@@ -192,6 +194,21 @@ watch(() => props.offers, () => {
   selectedOffers.value = []
   emit('update:selected', [])
 })
+
+// Navigate to offer details page
+const viewOfferDetails = (offer, event) => {
+  // Don't navigate if clicking on a checkbox, button, or image
+  if (event.target.tagName === 'INPUT' || 
+      event.target.tagName === 'BUTTON' || 
+      event.target.closest('button') || 
+      event.target.tagName === 'IMG' || 
+      event.target.closest('.group')) {
+    return
+  }
+  
+  // Navigate to offer details page
+  router.push(`/offers/${offer.id}`)
+}
 
 // Handle image loading errors
 const handleImageError = (event) => {

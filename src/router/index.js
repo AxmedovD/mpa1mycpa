@@ -68,6 +68,15 @@ const router = createRouter({
           }
         },
         {
+          path: 'offers/:id',
+          name: 'offer-details',
+          component: () => import('../pages/offers/OfferSingleView.vue'),
+          meta: {
+            title: 'Offer Details',
+            requiresAuth: true
+          }
+        },
+        {
           path: 'orders/report',
           name: 'order-reports',
           component: () => import('../pages/orders/OrderReportView.vue'),

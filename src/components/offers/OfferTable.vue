@@ -43,7 +43,7 @@
               <div class="relative h-12 w-12 group">
                 <img 
                   v-if="offer.image_url" 
-                  :src="getProductionImageUrl(offer.image_url)" 
+                  :src="offer.image_url" 
                   :alt="offer.name"
                   class="h-12 w-12 object-cover rounded-md"
                   @error="handleImageError"
@@ -56,7 +56,7 @@
                 <!-- Enlarged image on hover -->
                 <div v-if="offer.image_url" class="hidden group-hover:block absolute z-50 left-0 -top-24 transform shadow-xl rounded-md overflow-hidden">
                   <img 
-                    :src="getProductionImageUrl(offer.image_url)" 
+                    :src="offer.image_url" 
                     :alt="offer.name" 
                     class="h-32 w-32 object-cover"
                     @error="handleImageError"

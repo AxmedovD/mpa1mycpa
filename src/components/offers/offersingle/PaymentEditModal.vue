@@ -43,7 +43,6 @@
                 v-model="formData.shipping_method_id" 
                 type="number" 
                 class="w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
-                required
               />
             </div>
             
@@ -195,7 +194,7 @@ const emit = defineEmits(['save', 'close'])
 
 // Form data with default values
 const formData = reactive({
-  shipping_method_id: 0,
+  shipping_method_id: null,
   tariff_id: null,
   group_id: null,
   sell_price: 0,

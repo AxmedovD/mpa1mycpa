@@ -84,37 +84,151 @@
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-700">
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Dokon</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Mahsulot</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">SKU</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Jami</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Birinchi yaratilgan</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Oxirgi tahrirlangan</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Kechikkan kunlar</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Kutilmoqda</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Qabulda</th>
+              <th @click="toggleSort('store')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
+                <div class="flex items-center">
+                  <span>Dokon</span>
+                  <span v-if="sortField === 'store'" class="ml-1">
+                    <svg v-if="sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                  </span>
+                </div>
+              </th>
+              <th @click="toggleSort('product')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
+                <div class="flex items-center">
+                  <span>Mahsulot</span>
+                  <span v-if="sortField === 'product'" class="ml-1">
+                    <svg v-if="sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                  </span>
+                </div>
+              </th>
+              <th @click="toggleSort('sku')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
+                <div class="flex items-center">
+                  <span>SKU</span>
+                  <span v-if="sortField === 'sku'" class="ml-1">
+                    <svg v-if="sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                  </span>
+                </div>
+              </th>
+              <th @click="toggleSort('new_quantity')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
+                <div class="flex items-center">
+                  <span>Yangi</span>
+                  <span v-if="sortField === 'new_quantity'" class="ml-1">
+                    <svg v-if="sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                  </span>
+                </div>
+              </th>
+              <th @click="toggleSort('waiting_quantity')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
+                <div class="flex items-center">
+                  <span>Kutilmoqda</span>
+                  <span v-if="sortField === 'waiting_quantity'" class="ml-1">
+                    <svg v-if="sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                  </span>
+                </div>
+              </th>
+              <th @click="toggleSort('min_days_new')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
+                <div class="flex items-center">
+                  <span>Min Kun (Yangi)</span>
+                  <span v-if="sortField === 'min_days_new'" class="ml-1">
+                    <svg v-if="sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                  </span>
+                </div>
+              </th>
+              <th @click="toggleSort('max_days_new')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
+                <div class="flex items-center">
+                  <span>Max Kun (Yangi)</span>
+                  <span v-if="sortField === 'max_days_new'" class="ml-1">
+                    <svg v-if="sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                  </span>
+                </div>
+              </th>
+              <th @click="toggleSort('min_days_waiting')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
+                <div class="flex items-center">
+                  <span>Min Kun (Kutilmoqda)</span>
+                  <span v-if="sortField === 'min_days_waiting'" class="ml-1">
+                    <svg v-if="sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                  </span>
+                </div>
+              </th>
+              <th @click="toggleSort('max_days_waiting')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
+                <div class="flex items-center">
+                  <span>Max Kun (Kutilmoqda)</span>
+                  <span v-if="sortField === 'max_days_waiting'" class="ml-1">
+                    <svg v-if="sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                  </span>
+                </div>
+              </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Buyurtma raqamlari</th>
             </tr>
           </thead>
           <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-            <tr v-for="(report, index) in reports" :key="index" class="hover:bg-gray-50 dark:hover:bg-gray-700">
+            <tr v-for="(report, index) in sortedReports" :key="index" class="hover:bg-gray-50 dark:hover:bg-gray-700">
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ report.store }}</td>
               <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white max-w-[300px] break-words">{{ report.product }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ report.sku }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ report.total_quantity }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ formatDate(report.first_created_at) }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ formatDate(report.last_edited_at) }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium" :class="getWaitingDaysClass(report.waiting_days)">
-                {{ report.waiting_days }} kun
-              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ report.new_quantity }}</td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ report.waiting_quantity }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ report.accept_quantity }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium" :class="getWaitingDaysClass(report.min_days_new || 0)">
+                {{ report.min_days_new !== null ? report.min_days_new + ' kun' : '-' }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium" :class="getWaitingDaysClass(report.max_days_new || 0)">
+                {{ report.max_days_new !== null ? report.max_days_new + ' kun' : '-' }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium" :class="getWaitingDaysClass(report.min_days_waiting || 0)">
+                {{ report.min_days_waiting !== null ? report.min_days_waiting + ' kun' : '-' }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium" :class="getWaitingDaysClass(report.max_days_waiting || 0)">
+                {{ report.max_days_waiting !== null ? report.max_days_waiting + ' kun' : '-' }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                 <div class="flex items-center">
-                  <span>{{ formatOrderNumbers(report.sample_order_numbers) }}</span>
+                  <span>{{ formatOrderNumbers(report.order_ids) }}</span>
                   <button 
-                    @click="copyToClipboard(report.sample_order_numbers)" 
-                    class="ml-2 text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
+                    @click="copyToClipboard(report.order_ids)" 
+                    class="ml-2 text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
                     title="Copy all order numbers"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -146,11 +260,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
 import { API_URL } from '../../config/api'
 import { getAuthHeaders } from '../../services/auth'
 import Pagination from '../../components/common/Pagination.vue'
+
+// External API configuration
+const EXTERNAL_URL = import.meta.env.VITE_EXTERNAL_URL
+const EXTERNAL_API_KEY = import.meta.env.VITE_EXTERNAL_API_KEY
 
 // State
 const reports = ref([])
@@ -158,6 +276,10 @@ const stores = ref([])
 const loading = ref(false)
 const error = ref(null)
 const copySuccess = ref(false)
+
+// Sorting state
+const sortField = ref('max_days_waiting')
+const sortDirection = ref('desc')
 
 // Filters
 const filters = ref({
@@ -186,7 +308,6 @@ const pagination = ref({
 const fetchReports = async () => {
   try {
     loading.value = true
-    const headers = await getAuthHeaders()
     
     // Build query params
     const params = new URLSearchParams()
@@ -198,12 +319,14 @@ const fetchReports = async () => {
     params.append('page', filters.value.page)
     params.append('per_page', filters.value.per_page)
     
-    // Use filtered endpoint if any specific filter is applied
-    const endpoint = (filters.value.store || filters.value.product || filters.value.sku || filters.value.min_waiting_days) 
-      ? `${API_URL}/reports/orders/filtered` 
-      : `${API_URL}/reports/orders`
+    // Use external API endpoint with API key in header
+    const endpoint = `${EXTERNAL_URL}/api/v1/late-orders`
+    const headers = {
+      'X-API-Key': EXTERNAL_API_KEY
+    }
     
     const response = await axios.get(`${endpoint}?${params.toString()}`, { headers })
+    
     
     if (response.data.status) {
       reports.value = response.data.data
@@ -279,11 +402,11 @@ const formatDate = (dateString) => {
 // Format order numbers (show max 3)
 const formatOrderNumbers = (orderNumbersString) => {
   if (!orderNumbersString) return '-'
-  const orderNumbers = orderNumbersString.split(',')
+  const orderNumbers = orderNumbersString.split(' ')
   if (orderNumbers.length <= 3) {
-    return orderNumbersString
+    return orderNumbers.join(' ')
   }
-  return `${orderNumbers.slice(0, 3).join(', ')}...`
+  return `${orderNumbers.slice(0, 3).join(' ')}...`
 }
 
 // Copy order numbers to clipboard
@@ -309,6 +432,48 @@ const getWaitingDaysClass = (days) => {
 }
 
 // Fetch data on component mount
+// Toggle sort field and direction
+const toggleSort = (field) => {
+  if (sortField.value === field) {
+    // Toggle direction if clicking the same field
+    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    // Set new field and default to ascending
+    sortField.value = field
+    sortDirection.value = 'asc'
+  }
+}
+
+// Computed property for sorted reports
+const sortedReports = computed(() => {
+  if (!reports.value.length) return []
+  
+  return [...reports.value].sort((a, b) => {
+    let aValue = a[sortField.value]
+    let bValue = b[sortField.value]
+    
+    // Handle special cases for nested properties or null values
+    if (sortField.value === 'min_days_new' || sortField.value === 'max_days_new' || 
+        sortField.value === 'min_days_waiting' || sortField.value === 'max_days_waiting') {
+      aValue = aValue === null ? -1 : aValue
+      bValue = bValue === null ? -1 : bValue
+    }
+    
+    // Handle string comparison
+    if (typeof aValue === 'string' && typeof bValue === 'string') {
+      const comparison = aValue.localeCompare(bValue)
+      return sortDirection.value === 'asc' ? comparison : -comparison
+    }
+    
+    // Handle number comparison
+    if (sortDirection.value === 'asc') {
+      return aValue - bValue
+    } else {
+      return bValue - aValue
+    }
+  })
+})
+
 onMounted(() => {
   fetchReports()
 })

@@ -35,6 +35,11 @@ export const sidebarMenuItems = [
         name: 'Kechikkan buyurtmalar',
         route: '/orders/report',
         allowedRoles: ['superadmin', 'admin'] // All roles can access order reports
+      },
+      {
+        name: 'Status hisoboti',
+        route: '/orders/status-report',
+        allowedRoles: ['superadmin', 'admin'] // Only superadmin and admin can access status report
       }
     ],
     allowedRoles: ['superadmin', 'admin'] // All roles can access orders

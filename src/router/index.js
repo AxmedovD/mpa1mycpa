@@ -86,6 +86,15 @@ const router = createRouter({
           }
         },
         {
+          path: 'orders/status-report',
+          name: 'order-status-report',
+          component: () => import('../pages/orders/OrderStatusReportView.vue'),
+          meta: {
+            title: 'Order Status Report',
+            requiresAuth: true
+          }
+        },
+        {
           path: 'stores',
           name: 'stores',
           component: () => import('../pages/stores/StoresView.vue'),

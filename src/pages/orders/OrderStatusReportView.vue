@@ -47,7 +47,25 @@
             @keyup.enter="fetchReport"
           />
         </div>
-        <div>
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date Range</label>
+          <div class="flex flex-wrap gap-2">
+            <button 
+              v-for="preset in datePresets" 
+              :key="preset.value"
+              @click="activePreset = preset.value; applyDatePreset(preset.value)"
+              :class="[
+                'px-3 py-1 text-xs font-medium rounded-md transition-colors',
+                activePreset === preset.value 
+                  ? 'bg-indigo-600 text-white' 
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+              ]"
+            >
+              {{ preset.label }}
+            </button>
+          </div>
+        </div>
+        <div v-if="activePreset === 'custom'">
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date</label>
           <input 
             type="date" 
@@ -55,7 +73,7 @@
             class="w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
           />
         </div>
-        <div>
+        <div v-if="activePreset === 'custom'">
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Date</label>
           <input 
             type="date" 
@@ -85,8 +103,9 @@
       <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
     </div>
     
+    
     <!-- Results table -->
-    <div v-else-if="reports.length > 0" class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+    <div v-if="reports.length > 0" class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-700">
@@ -119,7 +138,17 @@
               </th>
               <th colspan="2" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                 <div class="flex items-center justify-center">
+                  <span>New</span>
+                </div>
+              </th>
+              <th colspan="2" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                <div class="flex items-center justify-center">
                   <span>Approved</span>
+                </div>
+              </th>
+              <th colspan="2" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                <div class="flex items-center justify-center">
+                  <span>Delivering</span>
                 </div>
               </th>
               <th colspan="2" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -141,6 +170,32 @@
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"></th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"></th>
+              <th @click="toggleSort('new.count')" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
+                <div class="flex items-center justify-center">
+                  <span>Count</span>
+                  <span v-if="sortField === 'new.count'" class="ml-1">
+                    <svg v-if="sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                  </span>
+                </div>
+              </th>
+              <th @click="toggleSort('new.percentage')" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
+                <div class="flex items-center justify-center">
+                  <span>%</span>
+                  <span v-if="sortField === 'new.percentage'" class="ml-1">
+                    <svg v-if="sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                  </span>
+                </div>
+              </th>
               <th @click="toggleSort('approved.count')" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
                 <div class="flex items-center justify-center">
                   <span>Count</span>
@@ -158,6 +213,32 @@
                 <div class="flex items-center justify-center">
                   <span>%</span>
                   <span v-if="sortField === 'approved.percentage'" class="ml-1">
+                    <svg v-if="sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                  </span>
+                </div>
+              </th>
+              <th @click="toggleSort('delivering.count')" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
+                <div class="flex items-center justify-center">
+                  <span>Count</span>
+                  <span v-if="sortField === 'delivering.count'" class="ml-1">
+                    <svg v-if="sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                  </span>
+                </div>
+              </th>
+              <th @click="toggleSort('delivering.percentage')" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
+                <div class="flex items-center justify-center">
+                  <span>%</span>
+                  <span v-if="sortField === 'delivering.percentage'" class="ml-1">
                     <svg v-if="sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
                     </svg>
@@ -254,12 +335,28 @@
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ report.total_leads }}</td>
               
+              <!-- New -->
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 text-center">
+                {{ report.new.count }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-center" :class="getPercentageClass(report.new.percentage)">
+                {{ report.new.percentage }}%
+              </td>
+              
               <!-- Approved -->
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 text-center">
                 {{ report.approved.count }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-center" :class="getPercentageClass(report.approved.percentage)">
                 {{ report.approved.percentage }}%
+              </td>
+              
+              <!-- Delivering -->
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 text-center">
+                {{ report.delivering.count }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-center" :class="getPercentageClass(report.delivering.percentage)">
+                {{ report.delivering.percentage }}%
               </td>
               
               <!-- Sold -->
@@ -287,6 +384,61 @@
               </td>
             </tr>
           </tbody>
+          <!-- Summary row if summary data is available -->
+          <tfoot v-if="summary" class="bg-indigo-50 dark:bg-indigo-900 font-semibold border-t-2 border-indigo-200 dark:border-indigo-700">
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-indigo-700 dark:text-indigo-300">Summary</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-indigo-700 dark:text-indigo-300">{{ summary.total_leads }}</td>
+              
+              <!-- New Summary -->
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-indigo-700 dark:text-indigo-300 text-center">
+                {{ summary.new.count }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-center" :class="getPercentageClass(summary.new.percentage)">
+                {{ summary.new.percentage }}%
+              </td>
+              
+              <!-- Approved Summary -->
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-indigo-700 dark:text-indigo-300 text-center">
+                {{ summary.approved.count }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-center" :class="getPercentageClass(summary.approved.percentage)">
+                {{ summary.approved.percentage }}%
+              </td>
+              
+              <!-- Delivering Summary -->
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-indigo-700 dark:text-indigo-300 text-center">
+                {{ summary.delivering.count }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-center" :class="getPercentageClass(summary.delivering.percentage)">
+                {{ summary.delivering.percentage }}%
+              </td>
+              
+              <!-- Sold Summary -->
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-indigo-700 dark:text-indigo-300 text-center">
+                {{ summary.sold.count }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-center" :class="getPercentageClass(summary.sold.percentage)">
+                {{ summary.sold.percentage }}%
+              </td>
+              
+              <!-- Returned Summary -->
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-indigo-700 dark:text-indigo-300 text-center">
+                {{ summary.returned.count }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-center" :class="getPercentageClass(summary.returned.percentage, true)">
+                {{ summary.returned.percentage }}%
+              </td>
+              
+              <!-- Canceled Summary -->
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-indigo-700 dark:text-indigo-300 text-center">
+                {{ summary.canceled.count }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-center" :class="getPercentageClass(summary.canceled.percentage, true)">
+                {{ summary.canceled.percentage }}%
+              </td>
+            </tr>
+          </tfoot>
         </table>
       </div>
     </div>
@@ -306,6 +458,7 @@ import { getAuthHeaders } from '../../services/auth'
 
 // State
 const reports = ref([])
+const summary = ref(null)
 const loading = ref(false)
 const error = ref(null)
 
@@ -316,12 +469,94 @@ const activeTab = ref('manager') // Default to manager tab
 const sortField = ref('total_leads')
 const sortDirection = ref('desc')
 
-// Get today's date in YYYY-MM-DD format, accounting for timezone
+// Date formatting helper function
+const formatDate = (date) => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+// Get today's date in YYYY-MM-DD format
 const now = new Date()
-const year = now.getFullYear()
-const month = String(now.getMonth() + 1).padStart(2, '0')
-const day = String(now.getDate()).padStart(2, '0')
-const today = `${year}-${month}-${day}`
+const today = formatDate(now)
+
+// Date range presets
+const datePresets = [
+  { label: 'Today', value: 'today' },
+  { label: 'Yesterday', value: 'yesterday' },
+  { label: 'Last 7 days', value: 'last7days' },
+  { label: 'This week', value: 'thisweek' },
+  { label: 'Last week', value: 'lastweek' },
+  { label: 'This month', value: 'thismonth' },
+  { label: 'Last month', value: 'lastmonth' },
+  { label: 'Custom', value: 'custom' }
+]
+
+// Function to apply date preset
+const applyDatePreset = (preset) => {
+  const now = new Date()
+  let startDate, endDate
+  
+  switch(preset) {
+    case 'today':
+      startDate = formatDate(now)
+      endDate = formatDate(now)
+      break
+    case 'yesterday':
+      const yesterday = new Date(now)
+      yesterday.setDate(now.getDate() - 1)
+      startDate = formatDate(yesterday)
+      endDate = formatDate(yesterday)
+      break
+    case 'last7days':
+      const sevenDaysAgo = new Date(now)
+      sevenDaysAgo.setDate(now.getDate() - 6) // -6 because it includes today
+      startDate = formatDate(sevenDaysAgo)
+      endDate = formatDate(now)
+      break
+    case 'thisweek':
+      const firstDayOfWeek = new Date(now)
+      const day = now.getDay() || 7 // Convert Sunday (0) to 7
+      firstDayOfWeek.setDate(now.getDate() - day + 1) // Monday is first day
+      startDate = formatDate(firstDayOfWeek)
+      endDate = formatDate(now)
+      break
+    case 'lastweek':
+      const lastWeekStart = new Date(now)
+      const lastWeekEnd = new Date(now)
+      const currentDay = now.getDay() || 7
+      lastWeekStart.setDate(now.getDate() - currentDay - 6) // Last Monday
+      lastWeekEnd.setDate(now.getDate() - currentDay) // Last Sunday
+      startDate = formatDate(lastWeekStart)
+      endDate = formatDate(lastWeekEnd)
+      break
+    case 'thismonth':
+      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+      startDate = formatDate(firstDayOfMonth)
+      endDate = formatDate(now)
+      break
+    case 'lastmonth':
+      const firstDayOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+      const lastDayOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0)
+      startDate = formatDate(firstDayOfLastMonth)
+      endDate = formatDate(lastDayOfLastMonth)
+      break
+    default: // 'custom' or any other value
+      return // Don't change dates for custom
+  }
+  
+  filters.value.start_date = startDate
+  filters.value.end_date = endDate
+  
+  // If not custom, fetch report immediately
+  if (preset !== 'custom') {
+    fetchReport()
+  }
+}
+
+// Current active preset
+const activePreset = ref('today')
 
 // Filters
 const filters = ref({
@@ -336,6 +571,15 @@ const filters = ref({
 // Watch for tab changes and fetch the appropriate report
 watch(activeTab, () => {
   fetchReport()
+})
+
+// Watch for date input changes to update preset to custom
+watch([() => filters.value.start_date, () => filters.value.end_date], () => {
+  // Only update if we're not already in the process of applying a preset
+  // This prevents infinite loops when a preset itself updates the dates
+  if (activePreset.value !== 'custom') {
+    activePreset.value = 'custom'
+  }
 })
 
 // Fetch report data
@@ -364,6 +608,7 @@ const fetchReport = async () => {
     
     if (response.data.status) {
       reports.value = response.data.data
+      summary.value = response.data.summary
     } else {
       error.value = response.data.message || 'Failed to fetch report'
     }
@@ -385,6 +630,9 @@ const resetFilters = () => {
     page: 1,
     per_page: 100
   }
+  reports.value = []
+  summary.value = null
+  activePreset.value = 'today'
   fetchReport()
 }
 

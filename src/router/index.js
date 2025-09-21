@@ -77,20 +77,20 @@ const router = createRouter({
           }
         },
         {
-          path: 'orders/report',
-          name: 'order-reports',
-          component: () => import('../pages/orders/OrderReportView.vue'),
+          path: 'orders/late-report',
+          name: 'order-late-report',
+          component: () => import('../pages/orders/OrderLateReportView.vue'),
           meta: {
-            title: 'Order Reports',
+            title: 'Order Late Report',
             requiresAuth: true
           }
         },
         {
-          path: 'orders/status-report',
-          name: 'order-status-report',
-          component: () => import('../pages/orders/OrderStatusReportView.vue'),
+          path: 'orders/report',
+          name: 'order-report',
+          component: () => import('../pages/orders/OrderReportView.vue'),
           meta: {
-            title: 'Order Status Report',
+            title: 'Order Report',
             requiresAuth: true
           }
         },

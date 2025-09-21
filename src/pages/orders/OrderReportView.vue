@@ -1,64 +1,133 @@
 <template>
   <div class="container mx-auto px-4 py-6">
-    <h1 class="text-2xl font-bold text-gray-800 dark:text-white mb-6">Kechikkan buyurtmalar</h1>
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Order Reports</h1>
+    
+    <!-- Tab Navigation -->
+    <div class="mb-6">
+      <div class="border-b border-gray-200 dark:border-gray-700">
+        <nav class="-mb-px flex space-x-8">
+          <button 
+            @click="activeTab = 'manager'" 
+            class="py-4 px-1 border-b-2 font-medium text-sm" 
+            :class="activeTab === 'manager' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
+          >
+            Manager Report
+          </button>
+          <button 
+            @click="activeTab = 'source'" 
+            class="py-4 px-1 border-b-2 font-medium text-sm" 
+            :class="activeTab === 'source' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
+          >
+            Source Report
+          </button>
+          <button 
+            @click="activeTab = 'product'" 
+            class="py-4 px-1 border-b-2 font-medium text-sm" 
+            :class="activeTab === 'product' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
+          >
+            Product Report
+          </button>
+          <button 
+            @click="activeTab = 'store'" 
+            class="py-4 px-1 border-b-2 font-medium text-sm" 
+            :class="activeTab === 'store' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
+          >
+            Store Report
+          </button>
+        </nav>
+      </div>
+    </div>
     
     <!-- Filters -->
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 mb-6">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Qidirish</label>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div v-if="activeTab === 'manager'">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Manager</label>
           <input 
             type="text" 
-            v-model="filters.search" 
-            placeholder="General search"
+            v-model="filters.manager" 
+            placeholder="Filter by manager"
             class="w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
-            @keyup.enter="fetchReports"
+            @keyup.enter="fetchReport"
           />
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dokon</label>
+        <div v-if="activeTab === 'source'">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Source</label>
           <input 
             type="text" 
-            v-model="filters.store" 
-            placeholder="Filter by store"
+            v-model="filters.source" 
+            placeholder="Filter by source"
             class="w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
-            @keyup.enter="fetchReports"
+            @keyup.enter="fetchReport"
           />
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Mahsulot</label>
+        <div v-if="activeTab === 'product'">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Product</label>
           <input 
             type="text" 
             v-model="filters.product" 
-            placeholder="Filter by product"
+            placeholder="Filter by product name"
             class="w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
-            @keyup.enter="fetchReports"
+            @keyup.enter="fetchReport"
           />
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">SKU</label>
+        <div v-if="activeTab === 'product'">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Article</label>
           <input 
             type="text" 
-            v-model="filters.sku" 
-            placeholder="Filter by SKU"
+            v-model="filters.article" 
+            placeholder="Filter by article"
             class="w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
-            @keyup.enter="fetchReports"
+            @keyup.enter="fetchReport"
           />
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Min Waiting Days</label>
+        <div v-if="activeTab === 'store'">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Store</label>
           <input 
-            type="number" 
-            v-model="filters.min_waiting_days" 
-            placeholder="Minimum days"
-            min="0"
+            type="text" 
+            v-model="filters.store" 
+            placeholder="Filter by store name"
             class="w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
-            @keyup.enter="fetchReports"
+            @keyup.enter="fetchReport"
           />
         </div>
-        <div class="flex items-end md:col-span-2">
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date Range</label>
+          <div class="flex flex-wrap gap-2">
+            <button 
+              v-for="preset in datePresets" 
+              :key="preset.value"
+              @click="activePreset = preset.value; applyDatePreset(preset.value)"
+              :class="[
+                'px-3 py-1 text-xs font-medium rounded-md transition-colors',
+                activePreset === preset.value 
+                  ? 'bg-indigo-600 text-white' 
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+              ]"
+            >
+              {{ preset.label }}
+            </button>
+          </div>
+        </div>
+        <div v-if="activePreset === 'custom'">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date</label>
+          <input 
+            type="date" 
+            v-model="filters.start_date" 
+            class="w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+          />
+        </div>
+        <div v-if="activePreset === 'custom'">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Date</label>
+          <input 
+            type="date" 
+            v-model="filters.end_date" 
+            class="w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+          />
+        </div>
+        <div class="flex items-end">
           <button 
-            @click="fetchReports" 
+            @click="fetchReport" 
             class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md text-sm mr-2"
           >
             Apply Filters
@@ -78,16 +147,17 @@
       <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
     </div>
     
+    
     <!-- Results table -->
-    <div v-else-if="reports.length > 0" class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+    <div v-if="reports.length > 0" class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
           <thead class="bg-gray-50 dark:bg-gray-700">
             <tr>
-              <th @click="toggleSort('store')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
+              <th @click="toggleSort(getMainColumnName())" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
                 <div class="flex items-center">
-                  <span>Dokon</span>
-                  <span v-if="sortField === 'store'" class="ml-1">
+                  <span>{{ getMainColumnLabel() }}</span>
+                  <span v-if="sortField === getMainColumnName()" class="ml-1">
                     <svg v-if="sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
                     </svg>
@@ -97,10 +167,10 @@
                   </span>
                 </div>
               </th>
-              <th @click="toggleSort('product')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
+              <th @click="toggleSort('total_leads')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
                 <div class="flex items-center">
-                  <span>Mahsulot</span>
-                  <span v-if="sortField === 'product'" class="ml-1">
+                  <span>Total Leads</span>
+                  <span v-if="sortField === 'total_leads'" class="ml-1">
                     <svg v-if="sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
                     </svg>
@@ -110,10 +180,44 @@
                   </span>
                 </div>
               </th>
-              <th @click="toggleSort('sku')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
-                <div class="flex items-center">
-                  <span>SKU</span>
-                  <span v-if="sortField === 'sku'" class="ml-1">
+              <th colspan="2" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                <div class="flex items-center justify-center">
+                  <span>New</span>
+                </div>
+              </th>
+              <th colspan="2" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                <div class="flex items-center justify-center">
+                  <span>Approved</span>
+                </div>
+              </th>
+              <th colspan="2" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                <div class="flex items-center justify-center">
+                  <span>Delivering</span>
+                </div>
+              </th>
+              <th colspan="2" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                <div class="flex items-center justify-center">
+                  <span>Sold</span>
+                </div>
+              </th>
+              <th colspan="2" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                <div class="flex items-center justify-center">
+                  <span>Returned</span>
+                </div>
+              </th>
+              <th colspan="2" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                <div class="flex items-center justify-center">
+                  <span>Canceled</span>
+                </div>
+              </th>
+            </tr>
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"></th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"></th>
+              <th @click="toggleSort('new.count')" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
+                <div class="flex items-center justify-center">
+                  <span>Count</span>
+                  <span v-if="sortField === 'new.count'" class="ml-1">
                     <svg v-if="sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
                     </svg>
@@ -123,10 +227,10 @@
                   </span>
                 </div>
               </th>
-              <th @click="toggleSort('new_quantity')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
-                <div class="flex items-center">
-                  <span>Yangi</span>
-                  <span v-if="sortField === 'new_quantity'" class="ml-1">
+              <th @click="toggleSort('new.percentage')" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
+                <div class="flex items-center justify-center">
+                  <span>%</span>
+                  <span v-if="sortField === 'new.percentage'" class="ml-1">
                     <svg v-if="sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
                     </svg>
@@ -136,10 +240,10 @@
                   </span>
                 </div>
               </th>
-              <th @click="toggleSort('waiting_quantity')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
-                <div class="flex items-center">
-                  <span>Kutilmoqda</span>
-                  <span v-if="sortField === 'waiting_quantity'" class="ml-1">
+              <th @click="toggleSort('approved.count')" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
+                <div class="flex items-center justify-center">
+                  <span>Count</span>
+                  <span v-if="sortField === 'approved.count'" class="ml-1">
                     <svg v-if="sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
                     </svg>
@@ -149,10 +253,10 @@
                   </span>
                 </div>
               </th>
-              <th @click="toggleSort('min_days_new')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
-                <div class="flex items-center">
-                  <span>Min Kun (Yangi)</span>
-                  <span v-if="sortField === 'min_days_new'" class="ml-1">
+              <th @click="toggleSort('approved.percentage')" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
+                <div class="flex items-center justify-center">
+                  <span>%</span>
+                  <span v-if="sortField === 'approved.percentage'" class="ml-1">
                     <svg v-if="sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
                     </svg>
@@ -162,10 +266,10 @@
                   </span>
                 </div>
               </th>
-              <th @click="toggleSort('max_days_new')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
-                <div class="flex items-center">
-                  <span>Max Kun (Yangi)</span>
-                  <span v-if="sortField === 'max_days_new'" class="ml-1">
+              <th @click="toggleSort('delivering.count')" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
+                <div class="flex items-center justify-center">
+                  <span>Count</span>
+                  <span v-if="sortField === 'delivering.count'" class="ml-1">
                     <svg v-if="sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
                     </svg>
@@ -175,10 +279,10 @@
                   </span>
                 </div>
               </th>
-              <th @click="toggleSort('min_days_waiting')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
-                <div class="flex items-center">
-                  <span>Min Kun (Kutilmoqda)</span>
-                  <span v-if="sortField === 'min_days_waiting'" class="ml-1">
+              <th @click="toggleSort('delivering.percentage')" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
+                <div class="flex items-center justify-center">
+                  <span>%</span>
+                  <span v-if="sortField === 'delivering.percentage'" class="ml-1">
                     <svg v-if="sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
                     </svg>
@@ -188,10 +292,10 @@
                   </span>
                 </div>
               </th>
-              <th @click="toggleSort('max_days_waiting')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
-                <div class="flex items-center">
-                  <span>Max Kun (Kutilmoqda)</span>
-                  <span v-if="sortField === 'max_days_waiting'" class="ml-1">
+              <th @click="toggleSort('sold.count')" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
+                <div class="flex items-center justify-center">
+                  <span>Count</span>
+                  <span v-if="sortField === 'sold.count'" class="ml-1">
                     <svg v-if="sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
                     </svg>
@@ -201,246 +305,473 @@
                   </span>
                 </div>
               </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Buyurtma raqamlari</th>
+              <th @click="toggleSort('sold.percentage')" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
+                <div class="flex items-center justify-center">
+                  <span>%</span>
+                  <span v-if="sortField === 'sold.percentage'" class="ml-1">
+                    <svg v-if="sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                  </span>
+                </div>
+              </th>
+              <th @click="toggleSort('returned.count')" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
+                <div class="flex items-center justify-center">
+                  <span>Count</span>
+                  <span v-if="sortField === 'returned.count'" class="ml-1">
+                    <svg v-if="sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                  </span>
+                </div>
+              </th>
+              <th @click="toggleSort('returned.percentage')" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
+                <div class="flex items-center justify-center">
+                  <span>%</span>
+                  <span v-if="sortField === 'returned.percentage'" class="ml-1">
+                    <svg v-if="sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                  </span>
+                </div>
+              </th>
+              <th @click="toggleSort('canceled.count')" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
+                <div class="flex items-center justify-center">
+                  <span>Count</span>
+                  <span v-if="sortField === 'canceled.count'" class="ml-1">
+                    <svg v-if="sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                  </span>
+                </div>
+              </th>
+              <th @click="toggleSort('canceled.percentage')" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600">
+                <div class="flex items-center justify-center">
+                  <span>%</span>
+                  <span v-if="sortField === 'canceled.percentage'" class="ml-1">
+                    <svg v-if="sortDirection === 'asc'" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd" />
+                    </svg>
+                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                  </span>
+                </div>
+              </th>
             </tr>
           </thead>
           <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
             <tr v-for="(report, index) in sortedReports" :key="index" class="hover:bg-gray-50 dark:hover:bg-gray-700">
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ report.store }}</td>
-              <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white max-w-[300px] break-words">{{ report.product }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ report.sku }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ report.new_quantity }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ report.waiting_quantity }}</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium" :class="getWaitingDaysClass(report.min_days_new || 0)">
-                {{ report.min_days_new !== null ? report.min_days_new + ' kun' : '-' }}
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                <template v-if="activeTab === 'manager'">{{ report.manager }}</template>
+                <template v-else-if="activeTab === 'source'">{{ report.source }}</template>
+                <template v-else-if="activeTab === 'product'">
+                  <div class="flex flex-col">
+                    <span class="font-medium">{{ report.product }}</span>
+                    <span class="text-xs text-gray-400">{{ report.article }}</span>
+                  </div>
+                </template>
+                <template v-else-if="activeTab === 'store'">
+                  <div class="flex flex-col">
+                    <span class="font-medium">{{ report.store }}</span>
+                    <span v-if="report.store_id" class="text-xs text-gray-400">ID: {{ report.store_id }}</span>
+                  </div>
+                </template>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium" :class="getWaitingDaysClass(report.max_days_new || 0)">
-                {{ report.max_days_new !== null ? report.max_days_new + ' kun' : '-' }}
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ report.total_leads }}</td>
+              
+              <!-- New -->
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 text-center">
+                {{ report.new.count }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium" :class="getWaitingDaysClass(report.min_days_waiting || 0)">
-                {{ report.min_days_waiting !== null ? report.min_days_waiting + ' kun' : '-' }}
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-center" :class="getPercentageClass(report.new.percentage)">
+                {{ report.new.percentage }}%
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium" :class="getWaitingDaysClass(report.max_days_waiting || 0)">
-                {{ report.max_days_waiting !== null ? report.max_days_waiting + ' kun' : '-' }}
+              
+              <!-- Approved -->
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 text-center">
+                {{ report.approved.count }}
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                <div class="flex items-center">
-                  <span>{{ formatOrderNumbers(report.order_ids) }}</span>
-                  <button 
-                    @click="copyToClipboard(report.order_ids)" 
-                    class="ml-2 text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
-                    title="Copy all order numbers"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                    </svg>
-                  </button>
-                </div>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-center" :class="getPercentageClass(report.approved.percentage)">
+                {{ report.approved.percentage }}%
+              </td>
+              
+              <!-- Delivering -->
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 text-center">
+                {{ report.delivering.count }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-center" :class="getPercentageClass(report.delivering.percentage)">
+                {{ report.delivering.percentage }}%
+              </td>
+              
+              <!-- Sold -->
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 text-center">
+                {{ report.sold.count }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-center" :class="getPercentageClass(report.sold.percentage)">
+                {{ report.sold.percentage }}%
+              </td>
+              
+              <!-- Returned -->
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 text-center">
+                {{ report.returned.count }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-center" :class="getPercentageClass(report.returned.percentage, true)">
+                {{ report.returned.percentage }}%
+              </td>
+              
+              <!-- Canceled -->
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 text-center">
+                {{ report.canceled.count }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-center" :class="getPercentageClass(report.canceled.percentage, true)">
+                {{ report.canceled.percentage }}%
               </td>
             </tr>
           </tbody>
+          <!-- Summary row if summary data is available -->
+          <tfoot v-if="summary" class="bg-indigo-50 dark:bg-indigo-900 font-semibold border-t-2 border-indigo-200 dark:border-indigo-700">
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-indigo-700 dark:text-indigo-300">Summary</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-indigo-700 dark:text-indigo-300">{{ summary.total_leads }}</td>
+              
+              <!-- New Summary -->
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-indigo-700 dark:text-indigo-300 text-center">
+                {{ summary.new.count }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-center" :class="getPercentageClass(summary.new.percentage)">
+                {{ summary.new.percentage }}%
+              </td>
+              
+              <!-- Approved Summary -->
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-indigo-700 dark:text-indigo-300 text-center">
+                {{ summary.approved.count }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-center" :class="getPercentageClass(summary.approved.percentage)">
+                {{ summary.approved.percentage }}%
+              </td>
+              
+              <!-- Delivering Summary -->
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-indigo-700 dark:text-indigo-300 text-center">
+                {{ summary.delivering.count }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-center" :class="getPercentageClass(summary.delivering.percentage)">
+                {{ summary.delivering.percentage }}%
+              </td>
+              
+              <!-- Sold Summary -->
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-indigo-700 dark:text-indigo-300 text-center">
+                {{ summary.sold.count }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-center" :class="getPercentageClass(summary.sold.percentage)">
+                {{ summary.sold.percentage }}%
+              </td>
+              
+              <!-- Returned Summary -->
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-indigo-700 dark:text-indigo-300 text-center">
+                {{ summary.returned.count }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-center" :class="getPercentageClass(summary.returned.percentage, true)">
+                {{ summary.returned.percentage }}%
+              </td>
+              
+              <!-- Canceled Summary -->
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-indigo-700 dark:text-indigo-300 text-center">
+                {{ summary.canceled.count }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-center" :class="getPercentageClass(summary.canceled.percentage, true)">
+                {{ summary.canceled.percentage }}%
+              </td>
+            </tr>
+          </tfoot>
         </table>
       </div>
-      
-      <!-- Pagination -->
-      <Pagination 
-        v-if="pagination.total > 0" 
-        :meta="pagination" 
-        @page-change="changePage" 
-        @per-page-change="changePerPage"
-        class="mt-4"
-      />
     </div>
     
     <!-- No results -->
     <div v-else-if="!loading" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center">
-      <p class="text-gray-500 dark:text-gray-400">Buyurtmalar topilmadi. Filtrlaringizni qayta tiklang.</p>
+      <p class="text-gray-500 dark:text-gray-400">No reports found. Try adjusting your filters.</p>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import axios from 'axios'
 import { API_URL } from '../../config/api'
 import { getAuthHeaders } from '../../services/auth'
-import Pagination from '../../components/common/Pagination.vue'
-
-// External API configuration
-const EXTERNAL_URL = import.meta.env.VITE_EXTERNAL_URL
-const EXTERNAL_API_KEY = import.meta.env.VITE_EXTERNAL_API_KEY
 
 // State
 const reports = ref([])
-const stores = ref([])
+const summary = ref(null)
 const loading = ref(false)
 const error = ref(null)
-const copySuccess = ref(false)
+
+// Tab state
+const activeTab = ref('manager') // Default to manager tab
 
 // Sorting state
-const sortField = ref('max_days_waiting')
+const sortField = ref('total_leads')
 const sortDirection = ref('desc')
+
+// Date formatting helper function
+const formatDate = (date) => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+// Get today's date in YYYY-MM-DD format
+const now = new Date()
+const today = formatDate(now)
+
+// Date range presets
+const datePresets = [
+  { label: 'Today', value: 'today' },
+  { label: 'Yesterday', value: 'yesterday' },
+  { label: 'Last 7 days', value: 'last7days' },
+  { label: 'This week', value: 'thisweek' },
+  { label: 'Last week', value: 'lastweek' },
+  { label: 'This month', value: 'thismonth' },
+  { label: 'Last month', value: 'lastmonth' },
+  { label: 'Custom', value: 'custom' }
+]
+
+// Function to apply date preset
+const applyDatePreset = (preset) => {
+  const now = new Date()
+  let startDate, endDate
+  
+  switch(preset) {
+    case 'today':
+      startDate = formatDate(now)
+      endDate = formatDate(now)
+      break
+    case 'yesterday':
+      const yesterday = new Date(now)
+      yesterday.setDate(now.getDate() - 1)
+      startDate = formatDate(yesterday)
+      endDate = formatDate(yesterday)
+      break
+    case 'last7days':
+      const sevenDaysAgo = new Date(now)
+      sevenDaysAgo.setDate(now.getDate() - 6) // -6 because it includes today
+      startDate = formatDate(sevenDaysAgo)
+      endDate = formatDate(now)
+      break
+    case 'thisweek':
+      const firstDayOfWeek = new Date(now)
+      const day = now.getDay() || 7 // Convert Sunday (0) to 7
+      firstDayOfWeek.setDate(now.getDate() - day + 1) // Monday is first day
+      startDate = formatDate(firstDayOfWeek)
+      endDate = formatDate(now)
+      break
+    case 'lastweek':
+      const lastWeekStart = new Date(now)
+      const lastWeekEnd = new Date(now)
+      const currentDay = now.getDay() || 7
+      lastWeekStart.setDate(now.getDate() - currentDay - 6) // Last Monday
+      lastWeekEnd.setDate(now.getDate() - currentDay) // Last Sunday
+      startDate = formatDate(lastWeekStart)
+      endDate = formatDate(lastWeekEnd)
+      break
+    case 'thismonth':
+      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+      startDate = formatDate(firstDayOfMonth)
+      endDate = formatDate(now)
+      break
+    case 'lastmonth':
+      const firstDayOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+      const lastDayOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0)
+      startDate = formatDate(firstDayOfLastMonth)
+      endDate = formatDate(lastDayOfLastMonth)
+      break
+    default: // 'custom' or any other value
+      return // Don't change dates for custom
+  }
+  
+  filters.value.start_date = startDate
+  filters.value.end_date = endDate
+  
+  // If not custom, fetch report immediately
+  if (preset !== 'custom') {
+    fetchReport()
+  }
+}
+
+// Current active preset
+const activePreset = ref('today')
 
 // Filters
 const filters = ref({
-  search: '',
-  store: '',
+  manager: '',
+  source: '',
   product: '',
-  sku: '',
-  min_waiting_days: '',
+  article: '',
+  store: '',
+  start_date: today,
+  end_date: today,
   page: 1,
-  per_page: 20
+  per_page: 100
 })
 
-// Pagination state
-const pagination = ref({
-  current_page: 1,
-  last_page: 1,
-  per_page: 20,
-  total: 0,
-  filtered_total: 0,
-  this_page: 0,
-  from: 0,
-  to: 0
+// Watch for tab changes and fetch the appropriate report
+watch(activeTab, () => {
+  fetchReport()
 })
 
-// Fetch order reports
-const fetchReports = async () => {
+// Watch for date input changes to update preset to custom
+watch([() => filters.value.start_date, () => filters.value.end_date], () => {
+  // Only update if we're not already in the process of applying a preset
+  // This prevents infinite loops when a preset itself updates the dates
+  if (activePreset.value !== 'custom') {
+    activePreset.value = 'custom'
+  }
+})
+
+// Fetch report data
+const fetchReport = async () => {
   try {
     loading.value = true
+    const headers = await getAuthHeaders()
     
     // Build query params
     const params = new URLSearchParams()
-    if (filters.value.search) params.append('search', filters.value.search)
-    if (filters.value.store) params.append('store', filters.value.store)
-    if (filters.value.product) params.append('product', filters.value.product)
-    if (filters.value.sku) params.append('sku', filters.value.sku)
-    if (filters.value.min_waiting_days) params.append('min_waiting_days', filters.value.min_waiting_days)
-    params.append('page', filters.value.page)
-    params.append('per_page', filters.value.per_page)
     
-    // Use external API endpoint with API key in header
-    const endpoint = `${EXTERNAL_URL}/api/v1/late-orders`
-    const headers = {
-      'X-API-Key': EXTERNAL_API_KEY
+    // Add tab-specific filters
+    if (activeTab.value === 'manager' && filters.value.manager) {
+      params.append('manager', filters.value.manager)
+    }
+    if (activeTab.value === 'source' && filters.value.source) {
+      params.append('source', filters.value.source)
+    }
+    if (activeTab.value === 'product') {
+      if (filters.value.product) params.append('product', filters.value.product)
+      if (filters.value.article) params.append('article', filters.value.article)
+    }
+    if (activeTab.value === 'store' && filters.value.store) {
+      params.append('store', filters.value.store)
+    }
+    
+    // Add common filters
+    if (filters.value.start_date) params.append('start_date', filters.value.start_date)
+    if (filters.value.end_date) params.append('end_date', filters.value.end_date)
+    
+    // Select the appropriate endpoint based on active tab
+    let endpoint
+    switch (activeTab.value) {
+      case 'manager':
+        endpoint = `${API_URL}/reports/orders/manager`
+        break
+      case 'source':
+        endpoint = `${API_URL}/reports/orders/source`
+        break
+      case 'product':
+        endpoint = `${API_URL}/reports/orders/product`
+        break
+      case 'store':
+        endpoint = `${API_URL}/reports/orders/store`
+        break
+      default:
+        endpoint = `${API_URL}/reports/orders/manager`
     }
     
     const response = await axios.get(`${endpoint}?${params.toString()}`, { headers })
     
-    
     if (response.data.status) {
       reports.value = response.data.data
-      
-      // Extract unique stores for filter dropdown
-      const uniqueStores = [...new Set(reports.value.map(report => report.store))]
-      if (uniqueStores.length > 0) {
-        stores.value = uniqueStores
-      }
-      
-      // Update pagination
-      pagination.value = {
-        current_page: response.data.meta.current_page,
-        last_page: response.data.meta.last_page,
-        per_page: response.data.meta.per_page,
-        total: response.data.meta.total,
-        filtered_total: response.data.meta.filtered_total || response.data.meta.total,
-        this_page: response.data.meta.this_page || response.data.meta.per_page,
-        from: response.data.meta.from || ((response.data.meta.current_page - 1) * response.data.meta.per_page) + 1,
-        to: response.data.meta.to || Math.min(response.data.meta.current_page * response.data.meta.per_page, response.data.meta.total)
-      }
+      summary.value = response.data.summary
     } else {
-      error.value = response.data.message || 'Failed to fetch order reports'
+      error.value = response.data.message || 'Failed to fetch report'
     }
   } catch (err) {
     error.value = err.response?.data?.message || 'An error occurred'
-    console.error('Error fetching order reports:', err)
+    console.error('Error fetching report:', err)
   } finally {
     loading.value = false
+  }
+}
+
+// Helper function to get the main column name for sorting based on active tab
+const getMainColumnName = () => {
+  switch (activeTab.value) {
+    case 'manager': return 'manager'
+    case 'source': return 'source'
+    case 'product': return 'article'
+    case 'store': return 'store'
+    default: return 'manager'
+  }
+}
+
+// Helper function to get the main column label based on active tab
+const getMainColumnLabel = () => {
+  switch (activeTab.value) {
+    case 'manager': return 'Manager'
+    case 'source': return 'Source'
+    case 'product': return 'Product'
+    case 'store': return 'Store'
+    default: return 'Manager'
   }
 }
 
 // Reset filters
 const resetFilters = () => {
   filters.value = {
-    search: '',
-    store: '',
+    manager: '',
+    source: '',
     product: '',
-    sku: '',
-    min_waiting_days: '',
+    article: '',
+    store: '',
+    start_date: today,
+    end_date: today,
     page: 1,
-    per_page: 20
+    per_page: 100
   }
-  fetchReports()
+  reports.value = []
+  summary.value = null
+  activePreset.value = 'today'
+  fetchReport()
 }
 
-// Change page
-const changePage = (page) => {
-  filters.value.page = page
-  fetchReports()
-}
-
-// Change items per page
-const changePerPage = (perPage) => {
-  filters.value.per_page = perPage
-  filters.value.page = 1
-  fetchReports()
-}
-
-// Format date
-const formatDate = (dateString) => {
-  if (!dateString) return '-'
-  const date = new Date(dateString)
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(date)
-}
-
-// Format order numbers (show max 3)
-const formatOrderNumbers = (orderNumbersString) => {
-  if (!orderNumbersString) return '-'
-  const orderNumbers = orderNumbersString.split(' ')
-  if (orderNumbers.length <= 3) {
-    return orderNumbers.join(' ')
-  }
-  return `${orderNumbers.slice(0, 3).join(' ')}...`
-}
-
-// Copy order numbers to clipboard
-const copyToClipboard = async (text) => {
-  try {
-    await navigator.clipboard.writeText(text)
-    copySuccess.value = true
-    setTimeout(() => {
-      copySuccess.value = false
-    }, 2000)
-  } catch (err) {
-    console.error('Failed to copy:', err)
-  }
-}
-
-// Get class for waiting days (color coding based on urgency)
-const getWaitingDaysClass = (days) => {
-  const daysNum = parseInt(days)
-  if (daysNum >= 30) return 'text-red-600 dark:text-red-400 font-bold'
-  if (daysNum >= 14) return 'text-orange-600 dark:text-orange-400'
-  if (daysNum >= 7) return 'text-yellow-600 dark:text-yellow-400'
-  return 'text-green-600 dark:text-green-400'
-}
-
-// Fetch data on component mount
 // Toggle sort field and direction
 const toggleSort = (field) => {
   if (sortField.value === field) {
     // Toggle direction if clicking the same field
     sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
   } else {
-    // Set new field and default to ascending
+    // Set new field and default to descending for counts
     sortField.value = field
-    sortDirection.value = 'asc'
+    sortDirection.value = field.includes('count') ? 'desc' : 'asc'
+  }
+}
+
+// Get color class based on percentage value
+const getPercentageClass = (percentage, isNegative = false) => {
+  if (isNegative) {
+    // For metrics where lower is better (returned, canceled)
+    if (percentage >= 30) return 'text-red-600 dark:text-red-400 font-bold'
+    if (percentage >= 20) return 'text-orange-600 dark:text-orange-400'
+    if (percentage >= 10) return 'text-yellow-600 dark:text-yellow-400'
+    return 'text-green-600 dark:text-green-400'
+  } else {
+    // For metrics where higher is better (approved, sold)
+    if (percentage >= 80) return 'text-green-600 dark:text-green-400 font-bold'
+    if (percentage >= 60) return 'text-green-600 dark:text-green-400'
+    if (percentage >= 40) return 'text-yellow-600 dark:text-yellow-400'
+    return 'text-red-600 dark:text-red-400'
   }
 }
 
@@ -449,14 +780,16 @@ const sortedReports = computed(() => {
   if (!reports.value.length) return []
   
   return [...reports.value].sort((a, b) => {
-    let aValue = a[sortField.value]
-    let bValue = b[sortField.value]
+    let aValue, bValue
     
-    // Handle special cases for nested properties or null values
-    if (sortField.value === 'min_days_new' || sortField.value === 'max_days_new' || 
-        sortField.value === 'min_days_waiting' || sortField.value === 'max_days_waiting') {
-      aValue = aValue === null ? -1 : aValue
-      bValue = bValue === null ? -1 : bValue
+    // Handle nested properties (e.g., 'approved.count')
+    if (sortField.value.includes('.')) {
+      const [parent, child] = sortField.value.split('.')
+      aValue = a[parent][child]
+      bValue = b[parent][child]
+    } else {
+      aValue = a[sortField.value]
+      bValue = b[sortField.value]
     }
     
     // Handle string comparison
@@ -474,7 +807,8 @@ const sortedReports = computed(() => {
   })
 })
 
+// Fetch data on component mount
 onMounted(() => {
-  fetchReports()
+  fetchReport()
 })
 </script>

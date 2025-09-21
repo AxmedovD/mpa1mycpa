@@ -33,12 +33,12 @@ export const sidebarMenuItems = [
     children: [
       {
         name: 'Kechikkan buyurtmalar',
-        route: '/orders/report',
+        route: '/orders/late-report',
         allowedRoles: ['superadmin', 'admin'] // All roles can access order reports
       },
       {
-        name: 'Status hisoboti',
-        route: '/orders/status-report',
+        name: 'Buyurtmalar hisoboti',
+        route: '/orders/report',
         allowedRoles: ['superadmin', 'admin'] // Only superadmin and admin can access status report
       }
     ],

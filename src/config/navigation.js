@@ -59,6 +59,21 @@ export const sidebarMenuItems = [
         name: 'Statuslar',
         route: '/settings/statuses',
         allowedRoles: ['superadmin', 'admin'] // Only superadmin and admin can access statuses
+      },
+      {
+        name: 'Sub Statuslar',
+        route: '/settings/sub-statuses',
+        allowedRoles: ['superadmin', 'admin'] // Only superadmin and admin can access sub statuses
+      },
+      {
+        name: 'Source Statuslar',
+        route: '/settings/source-statuses',
+        allowedRoles: ['superadmin', 'admin'] // Only superadmin and admin can access source statuses
+      },
+      {
+        name: 'Status Mapping',
+        route: '/settings/status-mappings',
+        allowedRoles: ['superadmin', 'admin'] // Only superadmin and admin can access status mappings
       }
     ]
   }

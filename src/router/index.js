@@ -59,6 +59,33 @@ const router = createRouter({
           }
         },
         {
+          path: 'settings/sub-statuses',
+          name: 'sub-statuses',
+          component: () => import('../pages/settings/SubStatusView.vue'),
+          meta: { 
+            title: 'Sub Statuses',
+            requiresAuth: true
+          }
+        },
+        {
+          path: 'settings/source-statuses',
+          name: 'source-statuses',
+          component: () => import('../pages/settings/SourceStatusView.vue'),
+          meta: { 
+            title: 'Source Statuses',
+            requiresAuth: true
+          }
+        },
+        {
+          path: 'settings/status-mappings',
+          name: 'status-mappings',
+          component: () => import('../pages/settings/StatusMappingView.vue'),
+          meta: { 
+            title: 'Status Mappings',
+            requiresAuth: true
+          }
+        },
+        {
           path: 'offers',
           name: 'offers',
           component: () => import('../pages/offers/OfferView.vue'),

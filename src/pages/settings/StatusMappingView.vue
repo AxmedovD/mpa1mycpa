@@ -1,0 +1,610 @@
+<template>
+  <div class="container mx-auto">
+    <div class="flex justify-between items-center mb-2">
+      <h1 class="text-2xl font-semibold text-gray-800 dark:text-white">Status Mappings</h1>
+      <button 
+        @click="openModal('create')" 
+        class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md flex items-center"
+      >
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+        </svg>
+        Add Status Mapping
+      </button>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 mb-6">
+      <div class="flex flex-col md:flex-row gap-4">
+        <div class="flex-1">
+          <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Search</label>
+          <input
+            id="search"
+            v-model="filters.search"
+            type="text"
+            @keyup.enter="applyFilters"
+            placeholder="Search by name..."
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+          />
+        </div>
+        <div class="w-full md:w-48">
+          <label for="is_active" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Active</label>
+          <select
+            id="is_active"
+            v-model="filters.is_active"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+          >
+            <option value="">All</option>
+            <option value="true">Active</option>
+            <option value="false">Inactive</option>
+          </select>
+        </div>
+        <div class="flex items-end">
+          <button 
+            @click="applyFilters" 
+            class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md mr-2"
+          >
+            Filter
+          </button>
+          <button 
+            @click="resetFilters" 
+            class="bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 font-medium py-2 px-4 rounded-md"
+          >
+            Reset
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading state -->
+    <div v-if="loading" class="flex justify-center items-center py-12">
+      <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+    </div>
+
+    <!-- No results -->
+    <div v-else-if="statusMappings.length === 0" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center">
+      <p class="text-gray-500 dark:text-gray-400">No status mappings found</p>
+    </div>
+
+    <!-- Results table -->
+    <div v-else class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+      <div class="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-gray-100 dark:scrollbar-track-gray-700">
+        <table class="w-full divide-y divide-gray-200 dark:divide-gray-700 table-fixed" style="min-width: 1220px;">
+        <thead class="bg-gray-50 dark:bg-gray-700">
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="width: 80px;">ID</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="width: 200px;">Name</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="width: 180px;">Source Integration</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="width: 160px;">Source Status</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="width: 140px;">Status</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="width: 140px;">Sub Status</th>
+            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="width: 100px;">Active</th>
+            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="width: 120px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+          <tr v-for="mapping in statusMappings" :key="mapping.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
+            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 cursor-help" 
+                :title="`${mapping.id}`">
+              #{{ mapping.id }}
+            </td>
+            <td class="px-4 py-4 text-sm font-medium text-gray-900 dark:text-white">
+              <div class="truncate cursor-help" 
+                   :title="`${mapping.name}`">
+                {{ mapping.name }}
+              </div>
+            </td>
+            <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-300">
+              <div class="truncate cursor-help" 
+                   :title="`${mapping.source_integration?.name || '❌ Not assigned'}`">
+                {{ mapping.source_integration?.name || '-' }}
+              </div>
+            </td>
+            <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-300">
+              <div class="truncate cursor-help" 
+                   :title="`${mapping.source_status?.name || '❌ Not assigned'}`">
+                {{ mapping.source_status?.name || '-' }}
+              </div>
+            </td>
+            <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-300">
+              <div class="truncate cursor-help" 
+                   :title="`${mapping.status?.name || '❌ Not assigned'}`">
+                {{ mapping.status?.name || '-' }}
+              </div>
+            </td>
+            <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-300">
+              <div class="truncate cursor-help" 
+                   :title="`${mapping.sub_status?.name || '❌ Not assigned'}`">
+                {{ mapping.sub_status?.name || '-' }}
+              </div>
+            </td>
+            <td class="px-4 py-4 whitespace-nowrap text-sm">
+              <div class="flex justify-center">
+                <span 
+                  :class="mapping.is_active 
+                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' 
+                    : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'" 
+                  class="px-2 py-1 text-xs font-semibold rounded-full cursor-help transition-all duration-200 hover:shadow-md"
+                  :title="`${mapping.is_active ? 'Active Status' : 'Inactive Status'}\n${mapping.is_active ? 'This mapping is currently active and processing' : 'This mapping is disabled and not processing'}\nClick Edit to change status`"
+                >
+                  {{ mapping.is_active ? 'Active' : 'Inactive' }}
+                </span>
+              </div>
+            </td>
+            <td class="px-4 py-4 whitespace-nowrap text-sm font-medium">
+              <div class="flex justify-center space-x-2">
+                <button 
+                  @click="openModal('edit', mapping)" 
+                  class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 text-sm transition-all duration-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 px-2 py-1 rounded cursor-pointer"
+                  :title="`✏️ Edit Mapping\n📝 Name: ${mapping.name}\n🔧 Modify configuration and settings\n💡 Click to open edit form`"
+                >
+                  Edit
+                </button>
+                <span class="text-gray-300">|</span>
+                <button 
+                  @click="confirmDelete(mapping)" 
+                  class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 text-sm transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1 rounded cursor-pointer"
+                  :title="`🗑️ Delete Mapping\n📝 Name: ${mapping.name}\n⚠️ This action cannot be undone\n💡 Click to confirm deletion`"
+                >
+                  Delete
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+
+      <!-- Pagination -->
+      <Pagination 
+        v-if="!loading && statusMappings.length > 0" 
+        :meta="pagination" 
+        @page-change="changePage" 
+        @per-page-change="changePerPage"
+        class="mt-4"
+      />
+    </div>
+
+    <!-- Status Mapping Form Modal -->
+    <div v-if="showModal" class="fixed inset-0 z-10 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+      <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75 transition-opacity" aria-hidden="true" @click="showModal = false"></div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+          <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">{{ modalMode === 'create' ? 'Add New Status Mapping' : 'Edit Status Mapping' }}</h3>
+            <form @submit.prevent="submitForm">
+              <div class="mb-4">
+                <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+                <input
+                  id="name"
+                  v-model="formData.name"
+                  type="text"
+                  required
+                  maxlength="255"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+              <div class="mb-4">
+                <label for="source_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Source Integration</label>
+                <select
+                  id="source_id"
+                  v-model="formData.source_id"
+                  required
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+                >
+                  <option value="" disabled>Select a source integration</option>
+                  <option v-for="source in sourceIntegrations" :key="source.id" :value="source.id">{{ source.name }}</option>
+                </select>
+              </div>
+              <div class="mb-4">
+                <label for="source_status_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Source Status</label>
+                <select
+                  id="source_status_id"
+                  v-model="formData.source_status_id"
+                  required
+                  :disabled="!formData.source_id"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <option value="" disabled>{{ !formData.source_id ? 'Select source integration first' : 'Select a source status' }}</option>
+                  <option v-for="sourceStatus in filteredSourceStatuses" :key="sourceStatus.id" :value="sourceStatus.id">{{ sourceStatus.name }}</option>
+                </select>
+              </div>
+              <div class="mb-4">
+                <label for="status_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+                <select
+                  id="status_id"
+                  v-model="formData.status_id"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+                >
+                  <option value="">Select a status (optional)</option>
+                  <option v-for="status in statuses" :key="status.id" :value="status.id">{{ status.name }}</option>
+                </select>
+              </div>
+              <div class="mb-4">
+                <label for="sub_status_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sub Status</label>
+                <select
+                  id="sub_status_id"
+                  v-model="formData.sub_status_id"
+                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+                >
+                  <option value="">Select a sub status (optional)</option>
+                  <option v-for="subStatus in subStatuses" :key="subStatus.id" :value="subStatus.id">{{ subStatus.name }}</option>
+                </select>
+              </div>
+              <div class="mb-4">
+                <div class="flex items-center">
+                  <input
+                    id="is_active"
+                    v-model="formData.is_active"
+                    type="checkbox"
+                    class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                  />
+                  <label for="is_active" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">Active</label>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+            <button 
+              @click="submitForm" 
+              :disabled="formSubmitting"
+              class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {{ formSubmitting ? 'Saving...' : 'Save' }}
+            </button>
+            <button 
+              @click="showModal = false" 
+              type="button" 
+              class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div v-if="showDeleteModal" class="fixed inset-0 z-10 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+      <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75 transition-opacity" aria-hidden="true" @click="showDeleteModal = false"></div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+          <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <div class="sm:flex sm:items-start">
+              <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 dark:bg-red-900 sm:mx-0 sm:h-10 sm:w-10">
+                <svg class="h-6 w-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white" id="modal-title">Delete Status Mapping</h3>
+                <div class="mt-2">
+                  <p class="text-sm text-gray-500 dark:text-gray-400">
+                    Are you sure you want to delete this status mapping? This action cannot be undone.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+            <button 
+              @click="deleteStatusMapping" 
+              :disabled="deleteSubmitting"
+              class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {{ deleteSubmitting ? 'Deleting...' : 'Delete' }}
+            </button>
+            <button 
+              @click="showDeleteModal = false" 
+              type="button" 
+              class="mt-3 w-full inline-flex justify-center rounded-md border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted, computed, watch } from 'vue'
+import axios from 'axios'
+import { API_URL } from '../../config/api'
+import { getAuthHeaders } from '../../services/auth'
+import Pagination from '../../components/common/Pagination.vue'
+import { useToast } from 'vue-toastification'
+
+const toast = useToast()
+const statusMappings = ref([])
+const sourceIntegrations = ref([])
+const sourceStatuses = ref([])
+const statuses = ref([])
+const subStatuses = ref([])
+const loading = ref(false)
+const showModal = ref(false)
+const showDeleteModal = ref(false)
+const modalMode = ref('create')
+const formSubmitting = ref(false)
+const deleteSubmitting = ref(false)
+const selectedStatusMapping = ref(null)
+const error = ref(null)
+
+// Pagination state
+const pagination = ref({
+  current_page: 1,
+  last_page: 1,
+  per_page: 20,
+  total: 0,
+  filtered_total: 0,
+  this_page: 0,
+  from: 0,
+  to: 0
+})
+
+const filters = ref({
+  search: '',
+  is_active: '',
+  page: 1,
+  per_page: 20
+})
+
+const formData = ref({
+  name: '',
+  source_id: '',
+  source_status_id: '',
+  status_id: '',
+  sub_status_id: '',
+  is_active: true
+})
+
+// Computed property to filter source statuses by selected source integration
+const filteredSourceStatuses = computed(() => {
+  if (!formData.value.source_id) {
+    return []
+  }
+  return sourceStatuses.value.filter(status => status.source_id == formData.value.source_id)
+})
+
+// Watch for source_id changes to reset source_status_id
+watch(() => formData.value.source_id, (newSourceId, oldSourceId) => {
+  if (newSourceId !== oldSourceId) {
+    formData.value.source_status_id = ''
+  }
+})
+
+const fetchStatusMappings = async () => {
+  try {
+    loading.value = true
+    const headers = await getAuthHeaders()
+    const params = new URLSearchParams()
+    if (filters.value.search) params.append('search', filters.value.search)
+    if (filters.value.is_active !== '') params.append('is_active', filters.value.is_active)
+    params.append('page', filters.value.page)
+    params.append('per_page', filters.value.per_page)
+    
+    const response = await axios.get(`${API_URL}/status-mappings/get?${params.toString()}`, { headers })
+    
+    if (response.data.success) {
+      statusMappings.value = response.data.data
+      
+      // Update pagination
+      pagination.value = {
+        current_page: response.data.meta.current_page,
+        last_page: response.data.meta.last_page,
+        per_page: response.data.meta.per_page,
+        total: response.data.meta.total,
+        filtered_total: response.data.meta.filtered_total || response.data.meta.total,
+        this_page: response.data.meta.this_page || response.data.meta.per_page,
+        from: response.data.meta.from || ((response.data.meta.current_page - 1) * response.data.meta.per_page) + 1,
+        to: response.data.meta.to || Math.min(response.data.meta.current_page * response.data.meta.per_page, response.data.meta.total)
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching status mappings:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+// Fetch source integrations for dropdown
+const fetchSourceIntegrations = async () => {
+  try {
+    const headers = await getAuthHeaders()
+    const response = await axios.get(`${API_URL}/source-integrations/get`, { 
+      headers,
+      params: { per_page: 100 }
+    })
+    
+    if (response.data.success) {
+      sourceIntegrations.value = response.data.data
+    }
+  } catch (error) {
+    console.error('Error fetching source integrations:', error)
+  }
+}
+
+// Fetch source statuses for dropdown
+const fetchSourceStatuses = async () => {
+  try {
+    const headers = await getAuthHeaders()
+    const response = await axios.get(`${API_URL}/source-statuses/get`, { 
+      headers,
+      params: { per_page: 100 }
+    })
+    
+    if (response.data.success) {
+      sourceStatuses.value = response.data.data
+    }
+  } catch (error) {
+    console.error('Error fetching source statuses:', error)
+  }
+}
+
+// Fetch statuses for dropdown
+const fetchStatuses = async () => {
+  try {
+    const headers = await getAuthHeaders()
+    const response = await axios.get(`${API_URL}/statuses/get`, { 
+      headers,
+      params: { per_page: 100, is_active: true }
+    })
+    
+    // Handle both success field and status field response formats
+    if (response.data.success || response.data.status) {
+      statuses.value = response.data.data || []
+    }
+  } catch (error) {
+    console.error('Error fetching statuses:', error)
+  }
+}
+
+// Fetch sub statuses for dropdown
+const fetchSubStatuses = async () => {
+  try {
+    const headers = await getAuthHeaders()
+    const response = await axios.get(`${API_URL}/sub-statuses/get`, { 
+      headers,
+      params: { per_page: 100, is_active: true }
+    })
+    
+    // Handle both success field and status field response formats
+    if (response.data.success || response.data.status) {
+      subStatuses.value = response.data.data || []
+    }
+  } catch (error) {
+    console.error('Error fetching sub statuses:', error)
+  }
+}
+
+const changePage = (page) => {
+  if (page < 1 || page > pagination.value.last_page) return
+  filters.value.page = page
+  fetchStatusMappings()
+}
+
+// Change items per page
+const changePerPage = (perPage) => {
+  filters.value.per_page = perPage
+  filters.value.page = 1 // Reset to first page when changing items per page
+  fetchStatusMappings()
+}
+
+const applyFilters = () => {
+  filters.value.page = 1
+  fetchStatusMappings()
+}
+
+const resetFilters = () => {
+  filters.value = {
+    search: '',
+    is_active: '',
+    page: 1,
+    per_page: 20
+  }
+  fetchStatusMappings()
+}
+
+const openModal = (mode, mapping = null) => {
+  modalMode.value = mode
+  error.value = null
+  if (mode === 'edit' && mapping) {
+    selectedStatusMapping.value = mapping
+    formData.value = {
+      name: mapping.name,
+      source_id: mapping.source_id,
+      source_status_id: mapping.source_status_id,
+      status_id: mapping.status_id,
+      sub_status_id: mapping.sub_status_id,
+      is_active: mapping.is_active
+    }
+  } else {
+    formData.value = {
+      name: '',
+      source_id: '',
+      source_status_id: '',
+      status_id: '',
+      sub_status_id: '',
+      is_active: true
+    }
+  }
+  showModal.value = true
+}
+
+const submitForm = async () => {
+  try {
+    formSubmitting.value = true
+    const headers = await getAuthHeaders()
+    let response
+    
+    if (modalMode.value === 'create') {
+      response = await axios.post(`${API_URL}/status-mappings/status-mapping/create`, formData.value, { headers })
+    } else {
+      response = await axios.put(`${API_URL}/status-mappings/status-mapping/${selectedStatusMapping.value.id}/update`, formData.value, { headers })
+    }
+    
+    if (response.data.success) {
+      showModal.value = false
+      fetchStatusMappings()
+      
+      // Show success toast
+      if (modalMode.value === 'create') {
+        toast.success(`Status mapping "${formData.value.name}" created successfully!`)
+      } else {
+        toast.success(`Status mapping "${formData.value.name}" updated successfully!`)
+      }
+    } else {
+      error.value = response.data.message || 'An error occurred'
+      toast.error(`❌ ${error.value}`)
+    }
+  } catch (err) {
+    error.value = err.response?.data?.message || 'An error occurred'
+    toast.error(`❌ ${error.value}`)
+    console.error('Error submitting form:', err)
+  } finally {
+    formSubmitting.value = false
+  }
+}
+
+const confirmDelete = (mapping) => {
+  selectedStatusMapping.value = mapping
+  showDeleteModal.value = true
+}
+
+const deleteStatusMapping = async () => {
+  try {
+    deleteSubmitting.value = true
+    const headers = await getAuthHeaders()
+    const mappingName = selectedStatusMapping.value.name
+    
+    const response = await axios.delete(`${API_URL}/status-mappings/status-mapping/${selectedStatusMapping.value.id}/delete`, { headers })
+    
+    if (response.data.success) {
+      showDeleteModal.value = false
+      fetchStatusMappings()
+      toast.success(`Status mapping "${mappingName}" deleted successfully!`)
+    } else {
+      const errorMsg = response.data.message || 'Failed to delete status mapping'
+      toast.error(`❌ ${errorMsg}`)
+      console.error('Error deleting status mapping:', errorMsg)
+    }
+  } catch (err) {
+    const errorMsg = err.response?.data?.message || 'An error occurred while deleting'
+    toast.error(`❌ ${errorMsg}`)
+    console.error('Error deleting status mapping:', err)
+  } finally {
+    deleteSubmitting.value = false
+  }
+}
+
+onMounted(() => {
+  fetchSourceIntegrations()
+  fetchSourceStatuses()
+  fetchStatuses()
+  fetchSubStatuses()
+  fetchStatusMappings()
+})
+</script>

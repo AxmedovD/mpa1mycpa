@@ -564,7 +564,7 @@ const filters = ref({
   is_active: '',
   source_id: 2, // Default source_id
   page: 1,
-  per_page: 20
+  per_page: 100
 })
 
 const formData = ref({

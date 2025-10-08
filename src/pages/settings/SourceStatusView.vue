@@ -2,15 +2,28 @@
   <div class="container mx-auto">
     <div class="flex justify-between items-center mb-2">
       <h1 class="text-2xl font-semibold text-gray-800 dark:text-white">Source Statuses</h1>
-      <button 
-        @click="openModal('create')" 
-        class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md flex items-center"
-      >
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-        </svg>
-        Add Source Status
-      </button>
+      <div class="flex space-x-3">
+        <button 
+          @click="syncSourceStatuses" 
+          :disabled="syncLoading"
+          class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <svg v-if="!syncLoading" class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          <div v-else class="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white mr-2"></div>
+          {{ syncLoading ? 'Syncing...' : 'Sync Statuses' }}
+        </button>
+        <button 
+          @click="openModal('create')" 
+          class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md flex items-center"
+        >
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+          </svg>
+          Add Source Status
+        </button>
+      </div>
     </div>
 
     <!-- Filters -->
@@ -356,6 +369,7 @@ const toast = useToast()
 const sourceStatuses = ref([])
 const sourceIntegrations = ref([])
 const loading = ref(false)
+const syncLoading = ref(false)
 const showModal = ref(false)
 const showDeleteModal = ref(false)
 const showBulkUpdateModal = ref(false)
@@ -649,6 +663,39 @@ const clearSelection = () => {
 }
 
 // Fetch data on component mount
+// Sync source statuses from external sources
+const syncSourceStatuses = async () => {
+  try {
+    syncLoading.value = true
+    const headers = await getAuthHeaders()
+    
+    // Using POST method as required by the API
+    const response = await axios.post(`${API_URL}/source-statuses/sync`, {}, { headers })
+    
+    if (response.data.status || response.data.success) {
+      const result = response.data.data
+      
+      // Show detailed success message with counts
+      toast.success(
+        `Statuses synced successfully! \n` +
+        `✅ Inserted: ${result.inserted} \n` +
+        `🔄 Updated: ${result.updated} \n` +
+        `⏭️ Skipped: ${result.skipped}`
+      )
+      
+      // Refresh the source statuses list
+      fetchSourceStatuses()
+    } else {
+      toast.error(response.data.message || 'Failed to sync statuses')
+    }
+  } catch (error) {
+    console.error('Error syncing source statuses:', error)
+    toast.error(`Failed to sync statuses: ${error.response?.data?.message || error.message || 'Unknown error'}`)
+  } finally {
+    syncLoading.value = false
+  }
+}
+
 onMounted(() => {
   fetchSourceIntegrations()
   fetchSourceStatuses()

@@ -13,9 +13,55 @@
       </button>
     </div>
 
-    <!-- Filters -->
+    <!-- View Toggle -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 mb-4 flex justify-end">
+      <div class="inline-flex rounded-md shadow-sm" role="group">
+        <button 
+          @click="currentView = 'card'" 
+          type="button" 
+          :class="[
+            'px-4 py-2 text-sm font-medium border border-gray-200 dark:border-gray-600 rounded-l-lg',
+            currentView === 'card' 
+              ? 'bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-600 dark:text-white dark:hover:bg-indigo-700' 
+              : 'bg-white text-gray-700 hover:bg-gray-100 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600'
+          ]"
+        >
+          <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+          </svg>
+          Card View
+        </button>
+        <button 
+          @click="currentView = 'table'" 
+          type="button" 
+          :class="[
+            'px-4 py-2 text-sm font-medium border border-gray-200 dark:border-gray-600 rounded-r-lg',
+            currentView === 'table' 
+              ? 'bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-600 dark:text-white dark:hover:bg-indigo-700' 
+              : 'bg-white text-gray-700 hover:bg-gray-100 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600'
+          ]"
+        >
+          <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+          </svg>
+          Table View
+        </button>
+      </div>
+    </div>
+    
+    <!-- Source Integration Filter -->
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 mb-6">
       <div class="flex flex-col md:flex-row gap-4">
+        <div class="w-full md:w-64">
+          <label for="source_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Source Integration</label>
+          <select
+            id="source_id"
+            v-model="filters.source_id"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+          >
+            <option v-for="source in sourceIntegrations" :key="source.id" :value="source.id">{{ source.name }}</option>
+          </select>
+        </div>
         <div class="flex-1">
           <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Search</label>
           <input
@@ -62,107 +108,250 @@
     </div>
 
     <!-- No results -->
-    <div v-else-if="statusMappings.length === 0" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center">
-      <p class="text-gray-500 dark:text-gray-400">No status mappings found</p>
+    <div v-else-if="sourceStatuses.length === 0" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center">
+      <p class="text-gray-500 dark:text-gray-400">No source statuses found</p>
     </div>
 
-    <!-- Results table -->
-    <div v-else class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-      <div class="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-gray-100 dark:scrollbar-track-gray-700">
-        <table class="w-full divide-y divide-gray-200 dark:divide-gray-700 table-fixed" style="min-width: 1220px;">
-        <thead class="bg-gray-50 dark:bg-gray-700">
-          <tr>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="width: 80px;">ID</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="width: 200px;">Name</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="width: 180px;">Source Integration</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="width: 160px;">Source Status</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="width: 140px;">Status</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="width: 140px;">Sub Status</th>
-            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="width: 100px;">Active</th>
-            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider" style="width: 120px;">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-          <tr v-for="mapping in statusMappings" :key="mapping.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
-            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300 cursor-help" 
-                :title="`${mapping.id}`">
-              #{{ mapping.id }}
-            </td>
-            <td class="px-4 py-4 text-sm font-medium text-gray-900 dark:text-white">
-              <div class="truncate cursor-help" 
-                   :title="`${mapping.name}`">
-                {{ mapping.name }}
+    <!-- Card View: Source statuses on left, mappings on right -->
+    <div v-else-if="currentView === 'card'" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Source Statuses List (Left Side) -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
+        <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Source Statuses</h2>
+        <div class="space-y-2 max-h-[70vh] overflow-y-auto pr-2">
+          <div 
+            v-for="status in sourceStatuses" 
+            :key="status.id"
+            @click="selectSourceStatus(status)"
+            :class="[
+              'p-3 rounded-md cursor-pointer transition-all duration-200',
+              selectedSourceStatus && selectedSourceStatus.id === status.id
+                ? 'bg-indigo-100 dark:bg-indigo-900 border-l-4 border-indigo-500'
+                : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+            ]"
+          >
+            <div class="font-medium text-gray-900 dark:text-white">{{ status.name }}</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">Code: {{ status.code }}</div>
+            <div class="text-xs text-gray-400 dark:text-gray-500 mt-1">ID: {{ status.id }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mappings for Selected Source Status (Right Side) -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 lg:col-span-2">
+        <div v-if="!selectedSourceStatus" class="flex flex-col items-center justify-center h-64">
+          <svg class="w-16 h-16 text-gray-400 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+          </svg>
+          <p class="text-gray-500 dark:text-gray-400 text-center">Select a source status from the left to view or create mappings</p>
+        </div>
+
+        <div v-else>
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-white">Mappings for: {{ selectedSourceStatus.name }}</h2>
+            <button 
+              @click="createMappingForSourceStatus" 
+              class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-1.5 px-3 rounded-md flex items-center text-sm"
+            >
+              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              </svg>
+              Add Mapping
+            </button>
+          </div>
+
+          <!-- No mappings for selected source status -->
+          <div v-if="filteredMappings.length === 0" class="bg-gray-50 dark:bg-gray-700 rounded-lg p-8 text-center">
+            <p class="text-gray-500 dark:text-gray-400">No mappings found for this source status</p>
+            <button 
+              @click="createMappingForSourceStatus" 
+              class="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md inline-flex items-center"
+            >
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              </svg>
+              Create First Mapping
+            </button>
+          </div>
+
+          <!-- Mappings list -->
+          <div v-else class="space-y-4 max-h-[65vh] overflow-y-auto pr-2">
+            <div 
+              v-for="mapping in filteredMappings" 
+              :key="mapping.id"
+              class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow-sm hover:shadow-md transition-all duration-200"
+            >
+              <div class="flex justify-between items-start">
+                <div>
+                  <h3 class="font-medium text-gray-900 dark:text-white">{{ mapping.name }}</h3>
+                  <div class="mt-2 space-y-1">
+                    <div class="text-sm">
+                      <span class="text-gray-500 dark:text-gray-400">Status:</span> 
+                      <span class="text-gray-900 dark:text-white">{{ mapping.status?.name || 'Not assigned' }}</span>
+                    </div>
+                    <div class="text-sm">
+                      <span class="text-gray-500 dark:text-gray-400">Sub Status:</span> 
+                      <span class="text-gray-900 dark:text-white">{{ mapping.sub_status?.name || 'Not assigned' }}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <span 
+                    :class="mapping.is_active 
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' 
+                      : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'" 
+                    class="px-2 py-1 text-xs font-semibold rounded-full"
+                  >
+                    {{ mapping.is_active ? 'Active' : 'Inactive' }}
+                  </span>
+                </div>
               </div>
-            </td>
-            <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-300">
-              <div class="truncate cursor-help" 
-                   :title="`${mapping.source_integration?.name || '❌ Not assigned'}`">
-                {{ mapping.source_integration?.name || '-' }}
-              </div>
-            </td>
-            <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-300">
-              <div class="truncate cursor-help" 
-                   :title="`${mapping.source_status?.name || '❌ Not assigned'}`">
-                {{ mapping.source_status?.name || '-' }}
-              </div>
-            </td>
-            <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-300">
-              <div class="truncate cursor-help" 
-                   :title="`${mapping.status?.name || '❌ Not assigned'}`">
-                {{ mapping.status?.name || '-' }}
-              </div>
-            </td>
-            <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-300">
-              <div class="truncate cursor-help" 
-                   :title="`${mapping.sub_status?.name || '❌ Not assigned'}`">
-                {{ mapping.sub_status?.name || '-' }}
-              </div>
-            </td>
-            <td class="px-4 py-4 whitespace-nowrap text-sm">
-              <div class="flex justify-center">
-                <span 
-                  :class="mapping.is_active 
-                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' 
-                    : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'" 
-                  class="px-2 py-1 text-xs font-semibold rounded-full cursor-help transition-all duration-200 hover:shadow-md"
-                  :title="`${mapping.is_active ? 'Active Status' : 'Inactive Status'}\n${mapping.is_active ? 'This mapping is currently active and processing' : 'This mapping is disabled and not processing'}\nClick Edit to change status`"
-                >
-                  {{ mapping.is_active ? 'Active' : 'Inactive' }}
-                </span>
-              </div>
-            </td>
-            <td class="px-4 py-4 whitespace-nowrap text-sm font-medium">
-              <div class="flex justify-center space-x-2">
+              <div class="mt-4 flex justify-end space-x-2">
                 <button 
                   @click="openModal('edit', mapping)" 
-                  class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 text-sm transition-all duration-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 px-2 py-1 rounded cursor-pointer"
-                  :title="`✏️ Edit Mapping\n📝 Name: ${mapping.name}\n🔧 Modify configuration and settings\n💡 Click to open edit form`"
+                  class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 text-sm transition-all duration-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 px-2 py-1 rounded"
                 >
                   Edit
                 </button>
-                <span class="text-gray-300">|</span>
                 <button 
                   @click="confirmDelete(mapping)" 
-                  class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 text-sm transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1 rounded cursor-pointer"
-                  :title="`🗑️ Delete Mapping\n📝 Name: ${mapping.name}\n⚠️ This action cannot be undone\n💡 Click to confirm deletion`"
+                  class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 text-sm transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1 rounded"
                 >
                   Delete
                 </button>
               </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+            </div>
+          </div>
+        </div>
       </div>
-
-      <!-- Pagination -->
-      <Pagination 
-        v-if="!loading && statusMappings.length > 0" 
-        :meta="pagination" 
-        @page-change="changePage" 
-        @per-page-change="changePerPage"
-        class="mt-4"
-      />
+    </div>
+    
+    <!-- Table View: All source statuses and their mappings in a table -->
+    <div v-else class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead class="bg-gray-50 dark:bg-gray-700">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Source Status</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Code</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Mapping</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Sub Status</th>
+              <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Active</th>
+              <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            <tr v-for="status in sourceStatuses" :key="status.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
+              <!-- Source Status Info -->
+              <td class="px-6 py-4">
+                <div class="font-medium text-gray-900 dark:text-white">{{ status.name }}</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">ID: {{ status.id }}</div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ status.code }}</td>
+              
+              <!-- If no mappings exist for this source status -->
+              <template v-if="!getSourceStatusMappings(status.id).length">
+                <td colspan="4" class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                  <div class="flex items-center">
+                    <span class="italic mr-2">No mappings</span>
+                    <button 
+                      @click="createMappingForSpecificStatus(status)" 
+                      class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 text-xs bg-indigo-50 dark:bg-indigo-900/20 px-2 py-1 rounded"
+                    >
+                      Create Mapping
+                    </button>
+                  </div>
+                </td>
+                <td></td>
+              </template>
+              
+              <!-- If mappings exist, show the first one inline -->
+              <template v-else>
+                <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">
+                  {{ getSourceStatusMappings(status.id)[0].name }}
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                  {{ getSourceStatusMappings(status.id)[0].status?.name || 'Not assigned' }}
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                  {{ getSourceStatusMappings(status.id)[0].sub_status?.name || 'Not assigned' }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+                  <span 
+                    :class="getSourceStatusMappings(status.id)[0].is_active 
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' 
+                      : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'" 
+                    class="px-2 py-1 text-xs font-semibold rounded-full"
+                  >
+                    {{ getSourceStatusMappings(status.id)[0].is_active ? 'Active' : 'Inactive' }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
+                  <div class="flex justify-center space-x-2">
+                    <button 
+                      @click="openModal('edit', getSourceStatusMappings(status.id)[0])" 
+                      class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 text-sm"
+                    >
+                      Edit
+                    </button>
+                    <span class="text-gray-300">|</span>
+                    <button 
+                      @click="confirmDelete(getSourceStatusMappings(status.id)[0])" 
+                      class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 text-sm"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </template>
+            </tr>
+            
+            <!-- Additional rows for source statuses with multiple mappings -->
+            <template v-for="status in sourceStatusesWithMultipleMappings" :key="`extra-${status.id}`">
+              <tr v-for="(mapping, index) in getSourceStatusMappings(status.id).slice(1)" :key="mapping.id" class="bg-gray-50/50 dark:bg-gray-700/50">
+                <td class="px-6 py-4 border-l-4 border-transparent"></td>
+                <td class="px-6 py-4"></td>
+                <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">
+                  {{ mapping.name }}
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                  {{ mapping.status?.name || 'Not assigned' }}
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-300">
+                  {{ mapping.sub_status?.name || 'Not assigned' }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+                  <span 
+                    :class="mapping.is_active 
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' 
+                      : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'" 
+                    class="px-2 py-1 text-xs font-semibold rounded-full"
+                  >
+                    {{ mapping.is_active ? 'Active' : 'Inactive' }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
+                  <div class="flex justify-center space-x-2">
+                    <button 
+                      @click="openModal('edit', mapping)" 
+                      class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 text-sm"
+                    >
+                      Edit
+                    </button>
+                    <span class="text-gray-300">|</span>
+                    <button 
+                      @click="confirmDelete(mapping)" 
+                      class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 text-sm"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- Status Mapping Form Modal -->
@@ -212,25 +401,43 @@
               </div>
               <div class="mb-4">
                 <label for="status_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
-                <select
-                  id="status_id"
-                  v-model="formData.status_id"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
-                >
-                  <option value="">Select a status (optional)</option>
-                  <option v-for="status in statuses" :key="status.id" :value="status.id">{{ status.name }}</option>
-                </select>
+                <div class="relative">
+                  <select
+                    id="status_id"
+                    v-model="formData.status_id"
+                    :disabled="statusesLoading"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <option value="">{{ statusesLoading ? 'Loading statuses...' : 'Select a status (optional)' }}</option>
+                    <option v-for="status in statuses" :key="status.id" :value="status.id">{{ status.name }}</option>
+                  </select>
+                  <div v-if="statusesLoading" class="absolute right-3 top-2.5">
+                    <div class="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-indigo-500"></div>
+                  </div>
+                </div>
+                <p v-if="!statusesLoading && statuses.length === 0 && currentStatusTypeId" class="mt-1 text-xs text-amber-600 dark:text-amber-400">
+                  No statuses found for this source integration type
+                </p>
               </div>
               <div class="mb-4">
                 <label for="sub_status_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sub Status</label>
-                <select
-                  id="sub_status_id"
-                  v-model="formData.sub_status_id"
-                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
-                >
-                  <option value="">Select a sub status (optional)</option>
-                  <option v-for="subStatus in subStatuses" :key="subStatus.id" :value="subStatus.id">{{ subStatus.name }}</option>
-                </select>
+                <div class="relative">
+                  <select
+                    id="sub_status_id"
+                    v-model="formData.sub_status_id"
+                    :disabled="subStatusesLoading || !formData.status_id"
+                    class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <option value="">{{ !formData.status_id ? 'Select a status first' : subStatusesLoading ? 'Loading sub statuses...' : 'Select a sub status (optional)' }}</option>
+                    <option v-for="subStatus in subStatuses" :key="subStatus.id" :value="subStatus.id">{{ subStatus.name }}</option>
+                  </select>
+                  <div v-if="subStatusesLoading" class="absolute right-3 top-2.5">
+                    <div class="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-indigo-500"></div>
+                  </div>
+                </div>
+                <p v-if="!subStatusesLoading && subStatuses.length === 0 && formData.status_id" class="mt-1 text-xs text-amber-600 dark:text-amber-400">
+                  No sub statuses found for this status
+                </p>
               </div>
               <div class="mb-4">
                 <div class="flex items-center">
@@ -325,12 +532,18 @@ const sourceStatuses = ref([])
 const statuses = ref([])
 const subStatuses = ref([])
 const loading = ref(false)
+const statusesLoading = ref(false)
+const subStatusesLoading = ref(false)
 const showModal = ref(false)
 const showDeleteModal = ref(false)
 const modalMode = ref('create')
 const formSubmitting = ref(false)
 const deleteSubmitting = ref(false)
 const selectedStatusMapping = ref(null)
+const selectedSourceStatus = ref(null)
+const selectedStatus = ref(null)
+const currentStatusTypeId = ref(null)
+const currentView = ref('card') // 'card' or 'table'
 const error = ref(null)
 
 // Pagination state
@@ -345,16 +558,18 @@ const pagination = ref({
   to: 0
 })
 
+// Filters with default source_id = 2
 const filters = ref({
   search: '',
   is_active: '',
+  source_id: 2, // Default source_id
   page: 1,
   per_page: 20
 })
 
 const formData = ref({
   name: '',
-  source_id: '',
+  source_id: 2, // Default to source_id 2
   source_status_id: '',
   status_id: '',
   sub_status_id: '',
@@ -369,12 +584,108 @@ const filteredSourceStatuses = computed(() => {
   return sourceStatuses.value.filter(status => status.source_id == formData.value.source_id)
 })
 
-// Watch for source_id changes to reset source_status_id
+// Computed property to filter mappings by selected source status
+const filteredMappings = computed(() => {
+  if (!selectedSourceStatus.value) {
+    return []
+  }
+  return statusMappings.value.filter(mapping => mapping.source_status_id === selectedSourceStatus.value.id)
+})
+
+// Get the current source integration object
+const currentSourceIntegration = computed(() => {
+  if (!sourceIntegrations.value.length || !filters.value.source_id) return null
+  return sourceIntegrations.value.find(source => source.id === filters.value.source_id)
+})
+
+// Helper method to get mappings for a specific source status
+const getSourceStatusMappings = (sourceStatusId) => {
+  return statusMappings.value.filter(mapping => mapping.source_status_id === sourceStatusId)
+}
+
+// Computed property to get source statuses with multiple mappings
+const sourceStatusesWithMultipleMappings = computed(() => {
+  return sourceStatuses.value.filter(status => {
+    const mappingsCount = getSourceStatusMappings(status.id).length
+    return mappingsCount > 1
+  })
+})
+
+// Watch for source_id changes to reset selections and update status type ID
+watch(() => filters.value.source_id, (newSourceId) => {
+  // Reset selected source status when changing source integration
+  selectedSourceStatus.value = null
+  selectedStatus.value = null
+  
+  // Update the current status type ID from the selected source integration
+  const sourceIntegration = sourceIntegrations.value.find(source => source.id === newSourceId)
+  if (sourceIntegration && sourceIntegration.status_type_id) {
+    currentStatusTypeId.value = sourceIntegration.status_type_id
+    // Fetch statuses for this status type
+    fetchStatuses(sourceIntegration.status_type_id)
+  } else {
+    currentStatusTypeId.value = null
+    statuses.value = []
+  }
+  
+  // Fetch source statuses for the new source integration
+  fetchSourceStatuses()
+})
+
+// Watch for source_id changes in form to reset source_status_id
 watch(() => formData.value.source_id, (newSourceId, oldSourceId) => {
   if (newSourceId !== oldSourceId) {
     formData.value.source_status_id = ''
+    formData.value.status_id = ''
+    formData.value.sub_status_id = ''
   }
 })
+
+// Watch for status_id changes to load sub-statuses
+watch(() => formData.value.status_id, (newStatusId) => {
+  if (newStatusId) {
+    fetchSubStatuses(newStatusId)
+  } else {
+    subStatuses.value = []
+  }
+})
+
+// Select a source status
+const selectSourceStatus = (status) => {
+  selectedSourceStatus.value = status
+}
+
+// Create a new mapping for the selected source status
+const createMappingForSourceStatus = () => {
+  if (!selectedSourceStatus.value) return
+  
+  formData.value = {
+    name: `${selectedSourceStatus.value.name} Mapping`,
+    source_id: selectedSourceStatus.value.source_id,
+    source_status_id: selectedSourceStatus.value.id,
+    status_id: '',
+    sub_status_id: '',
+    is_active: true
+  }
+  
+  modalMode.value = 'create'
+  showModal.value = true
+}
+
+// Create a new mapping for a specific source status (used in table view)
+const createMappingForSpecificStatus = (status) => {
+  formData.value = {
+    name: `${status.name} Mapping`,
+    source_id: status.source_id,
+    source_status_id: status.id,
+    status_id: '',
+    sub_status_id: '',
+    is_active: true
+  }
+  
+  modalMode.value = 'create'
+  showModal.value = true
+}
 
 const fetchStatusMappings = async () => {
   try {
@@ -383,6 +694,7 @@ const fetchStatusMappings = async () => {
     const params = new URLSearchParams()
     if (filters.value.search) params.append('search', filters.value.search)
     if (filters.value.is_active !== '') params.append('is_active', filters.value.is_active)
+    if (filters.value.source_id) params.append('source_id', filters.value.source_id)
     params.append('page', filters.value.page)
     params.append('per_page', filters.value.per_page)
     
@@ -421,37 +733,61 @@ const fetchSourceIntegrations = async () => {
     
     if (response.data.success) {
       sourceIntegrations.value = response.data.data
+      
+      // If we have source integrations and a default source_id
+      if (sourceIntegrations.value.length && filters.value.source_id) {
+        const sourceIntegration = sourceIntegrations.value.find(source => source.id === filters.value.source_id)
+        if (sourceIntegration && sourceIntegration.status_type_id) {
+          currentStatusTypeId.value = sourceIntegration.status_type_id
+        }
+      }
     }
   } catch (error) {
     console.error('Error fetching source integrations:', error)
+    toast.error('Failed to load source integrations')
   }
 }
 
 // Fetch source statuses for dropdown
 const fetchSourceStatuses = async () => {
   try {
+    loading.value = true
     const headers = await getAuthHeaders()
-    const response = await axios.get(`${API_URL}/source-statuses/get`, { 
-      headers,
-      params: { per_page: 100 }
-    })
+    const params = new URLSearchParams()
+    params.append('source_id', filters.value.source_id)
+    params.append('per_page', 100)
+    
+    const response = await axios.get(`${API_URL}/source-statuses/get?${params.toString()}`, { headers })
     
     if (response.data.success) {
       sourceStatuses.value = response.data.data
+      
+      // If we have a source status with status_type_id, update it
+      if (sourceStatuses.value.length > 0 && sourceStatuses.value[0].source_integration?.status_type_id) {
+        currentStatusTypeId.value = sourceStatuses.value[0].source_integration.status_type_id
+      }
     }
   } catch (error) {
     console.error('Error fetching source statuses:', error)
+    toast.error('Failed to load source statuses')
+  } finally {
+    loading.value = false
   }
 }
 
-// Fetch statuses for dropdown
-const fetchStatuses = async () => {
+// Fetch statuses for dropdown based on type_id
+const fetchStatuses = async (statusTypeId) => {
   try {
+    if (!statusTypeId) return
+    
+    statusesLoading.value = true
     const headers = await getAuthHeaders()
-    const response = await axios.get(`${API_URL}/statuses/get`, { 
-      headers,
-      params: { per_page: 100, is_active: true }
-    })
+    const params = new URLSearchParams()
+    params.append('type_id', statusTypeId) // Changed from status_type_id to type_id
+    params.append('is_active', true)
+    params.append('per_page', 100)
+    
+    const response = await axios.get(`${API_URL}/statuses/get?${params.toString()}`, { headers })
     
     // Handle both success field and status field response formats
     if (response.data.success || response.data.status) {
@@ -459,17 +795,25 @@ const fetchStatuses = async () => {
     }
   } catch (error) {
     console.error('Error fetching statuses:', error)
+    toast.error('Failed to load statuses')
+  } finally {
+    statusesLoading.value = false
   }
 }
 
-// Fetch sub statuses for dropdown
-const fetchSubStatuses = async () => {
+// Fetch sub statuses for dropdown based on selected status
+const fetchSubStatuses = async (statusId) => {
   try {
+    if (!statusId) return
+    
+    subStatusesLoading.value = true
     const headers = await getAuthHeaders()
-    const response = await axios.get(`${API_URL}/sub-statuses/get`, { 
-      headers,
-      params: { per_page: 100, is_active: true }
-    })
+    const params = new URLSearchParams()
+    params.append('status_id', statusId)
+    params.append('is_active', true)
+    params.append('per_page', 100)
+    
+    const response = await axios.get(`${API_URL}/sub-statuses/get?${params.toString()}`, { headers })
     
     // Handle both success field and status field response formats
     if (response.data.success || response.data.status) {
@@ -477,6 +821,9 @@ const fetchSubStatuses = async () => {
     }
   } catch (error) {
     console.error('Error fetching sub statuses:', error)
+    toast.error('Failed to load sub statuses')
+  } finally {
+    subStatusesLoading.value = false
   }
 }
 
@@ -495,22 +842,31 @@ const changePerPage = (perPage) => {
 
 const applyFilters = () => {
   filters.value.page = 1
-  fetchStatusMappings()
+  selectedSourceStatus.value = null // Reset selected source status when applying filters
+  fetchSourceStatuses() // Fetch source statuses with the new filter
+  fetchStatusMappings() // Fetch status mappings with the new filter
 }
 
 const resetFilters = () => {
   filters.value = {
     search: '',
     is_active: '',
+    source_id: 2, // Keep default source_id
     page: 1,
     per_page: 20
   }
-  fetchStatusMappings()
+  selectedSourceStatus.value = null // Reset selected source status
+  fetchSourceStatuses() // Fetch source statuses with reset filters
+  fetchStatusMappings() // Fetch status mappings with reset filters
 }
 
 const openModal = (mode, mapping = null) => {
   modalMode.value = mode
   error.value = null
+  
+  // Reset sub-statuses when opening modal
+  subStatuses.value = []
+  
   if (mode === 'edit' && mapping) {
     selectedStatusMapping.value = mapping
     formData.value = {
@@ -521,16 +877,23 @@ const openModal = (mode, mapping = null) => {
       sub_status_id: mapping.sub_status_id,
       is_active: mapping.is_active
     }
+    
+    // When editing, fetch the sub-statuses for the selected status
+    if (mapping.status_id) {
+      fetchSubStatuses(mapping.status_id)
+    }
   } else {
+    // For create mode, pre-fill source_id from filters and source_status_id if selected
     formData.value = {
-      name: '',
-      source_id: '',
-      source_status_id: '',
+      name: selectedSourceStatus.value ? `${selectedSourceStatus.value.name} Mapping` : '',
+      source_id: filters.value.source_id,
+      source_status_id: selectedSourceStatus.value ? selectedSourceStatus.value.id : '',
       status_id: '',
       sub_status_id: '',
       is_active: true
     }
   }
+  
   showModal.value = true
 }
 
@@ -601,10 +964,20 @@ const deleteStatusMapping = async () => {
 }
 
 onMounted(() => {
-  fetchSourceIntegrations()
-  fetchSourceStatuses()
-  fetchStatuses()
-  fetchSubStatuses()
-  fetchStatusMappings()
+  // First fetch source integrations to get status_type_id
+  fetchSourceIntegrations().then(() => {
+    // Then fetch source statuses with default source_id=2
+    fetchSourceStatuses()
+    
+    // Fetch status mappings with default source_id=2
+    fetchStatusMappings()
+    
+    // If we have a status type ID from the source integration, fetch statuses
+    if (currentStatusTypeId.value) {
+      fetchStatuses(currentStatusTypeId.value)
+    }
+    
+    // We don't fetch sub-statuses until a status is selected in the form
+  })
 })
 </script>

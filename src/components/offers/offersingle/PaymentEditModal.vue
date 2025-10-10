@@ -13,11 +13,8 @@
             <!-- Sell Price -->
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sell Price</label>
-              <input 
+              <NumberInput 
                 v-model="formData.sell_price" 
-                type="number" 
-                step="0.01" 
-                class="w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
                 required
               />
             </div>
@@ -25,11 +22,8 @@
             <!-- Pay Web -->
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Pay Web</label>
-              <input 
+              <NumberInput 
                 v-model="formData.pay_web" 
-                type="number" 
-                step="0.01" 
-                class="w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
                 required
               />
             </div>
@@ -69,11 +63,8 @@
             <!-- Add Manager -->
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Add Manager</label>
-              <input 
+              <NumberInput 
                 v-model="formData.add_manager" 
-                type="number" 
-                step="0.01" 
-                class="w-full rounded-md border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
                 required
               />
             </div>
@@ -174,6 +165,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import NumberInput from '../../common/NumberInput.vue'
 
 const props = defineProps({
   payment: {

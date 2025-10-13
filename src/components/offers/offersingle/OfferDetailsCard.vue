@@ -88,12 +88,12 @@
           <div class="space-y-4">
             <div>
               <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Created At</h3>
-              <p class="text-base font-medium text-gray-900 dark:text-white">{{ formatDate(offer.created_at) }}</p>
+              <p class="text-base font-medium text-gray-900 dark:text-white">{{ offer.created_at }}</p>
             </div>
             
             <div>
               <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Updated At</h3>
-              <p class="text-base font-medium text-gray-900 dark:text-white">{{ formatDate(offer.updated_at) }}</p>
+              <p class="text-base font-medium text-gray-900 dark:text-white">{{ offer.updated_at }}</p>
             </div>
           </div>
         </div>

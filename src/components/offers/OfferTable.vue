@@ -181,6 +181,21 @@ watch(selectedOffers, (newSelected) => {
 // Format date
 const formatDate = (dateString) => {
   if (!dateString) return '-'
+  
+  // Check if the date is in DD-MM-YYYY HH:MM:SS format
+  if (dateString.includes('-') && dateString.includes(':')) {
+    const [datePart, timePart] = dateString.split(' ')
+    const [day, month, year] = datePart.split('-')
+    const date = new Date(year, month - 1, day)
+    
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric'
+    })
+  }
+  
+  // Fallback for other date formats
   const date = new Date(dateString)
   return date.toLocaleDateString('en-US', { 
     year: 'numeric', 

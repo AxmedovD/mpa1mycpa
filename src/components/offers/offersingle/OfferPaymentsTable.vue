@@ -53,8 +53,8 @@
                 <span>Free2: {{ payment.free2 }}</span>
               </div>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ formatDate(payment.created_at) }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ formatDate(payment.updated_at) }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ payment.created_at }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ payment.updated_at }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
               <button 
                 @click="$emit('edit-payment', payment)" 

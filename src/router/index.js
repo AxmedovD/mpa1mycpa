@@ -86,6 +86,15 @@ const router = createRouter({
           }
         },
         {
+          path: 'settings/json-fields',
+          name: 'json-fields',
+          component: () => import('../pages/settings/JsonFieldsView.vue'),
+          meta: { 
+            title: 'JSON Field Definitions',
+            requiresAuth: true
+          }
+        },
+        {
           path: 'offers',
           name: 'offers',
           component: () => import('../pages/offers/OfferView.vue'),

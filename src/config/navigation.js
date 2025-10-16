@@ -74,6 +74,11 @@ export const sidebarMenuItems = [
         name: 'Status Mapping',
         route: '/settings/status-mappings',
         allowedRoles: ['superadmin', 'admin'] // Only superadmin and admin can access status mappings
+      },
+      {
+        name: 'JSON Field Definitions',
+        route: '/settings/json-fields',
+        allowedRoles: ['superadmin', 'admin'] // Only superadmin and admin can access JSON field definitions
       }
     ]
   }

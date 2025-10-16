@@ -353,7 +353,14 @@
         <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
           <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
             <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">{{ modalMode === 'create' ? 'Add New Status' : 'Edit Status' }}</h3>
-            <form @submit.prevent="submitForm">
+            
+            <!-- Modal Loading State -->
+            <div v-if="modalLoading" class="flex justify-center items-center py-12">
+              <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+              <span class="ml-3 text-gray-600 dark:text-gray-400">Loading form data...</span>
+            </div>
+            
+            <form v-else @submit.prevent="submitForm">
               <div class="mb-4">
                 <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
                 <input
@@ -592,7 +599,7 @@
               </div>
             </form>
           </div>
-          <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+          <div v-if="!modalLoading" class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
             <button 
               @click="submitForm" 
               :disabled="formSubmitting"
@@ -681,6 +688,7 @@ const filterData = ref({
 })
 const loading = ref(false)
 const showModal = ref(false)
+const modalLoading = ref(false)
 const showDeleteModal = ref(false)
 const modalMode = ref('create')
 const formSubmitting = ref(false)
@@ -1013,51 +1021,57 @@ const resetFilters = () => {
 const openModal = async (mode, status = null) => {
   modalMode.value = mode
   error.value = null
-  
-  // Fetch available flags for the form
-  await fetchAvailableFlags()
-  
-  if (mode === 'edit' && status) {
-    selectedStatus.value = status
-    formData.value = {
-      name: status.name,
-      uz_name: status.uz_name || '',
-      code: status.code,
-      type_id: status.type_id,
-      is_active: status.is_active,
-      ordering_id: status.ordering_id,
-      color: status.color || '',
-      icon: status.icon || '',
-      flags: {
-        status_flags: {},
-        finance_flags: {},
-        report_flags: {},
-        warehouse_flags: {}
-      }
-    }
-    loadStatusFlags(status)
-  } else {
-    // Reset form for create mode
-    formData.value = {
-      name: '',
-      uz_name: '',
-      code: '',
-      type_id: '',
-      is_active: true,
-      ordering_id: null,
-      color: '',
-      icon: '',
-      flags: {
-        status_flags: {},
-        finance_flags: {},
-        report_flags: {},
-        warehouse_flags: {}
-      }
-    }
-    initializeFlags()
-  }
-  
   showModal.value = true
+  modalLoading.value = true
+  
+  try {
+    // Fetch available flags for the form
+    await fetchAvailableFlags()
+    
+    if (mode === 'edit' && status) {
+      selectedStatus.value = status
+      formData.value = {
+        name: status.name,
+        uz_name: status.uz_name || '',
+        code: status.code,
+        type_id: status.type_id,
+        is_active: status.is_active,
+        ordering_id: status.ordering_id,
+        color: status.color || '',
+        icon: status.icon || '',
+        flags: {
+          status_flags: {},
+          finance_flags: {},
+          report_flags: {},
+          warehouse_flags: {}
+        }
+      }
+      loadStatusFlags(status)
+    } else {
+      // Reset form for create mode
+      formData.value = {
+        name: '',
+        uz_name: '',
+        code: '',
+        type_id: '',
+        is_active: true,
+        ordering_id: null,
+        color: '',
+        icon: '',
+        flags: {
+          status_flags: {},
+          finance_flags: {},
+          report_flags: {},
+          warehouse_flags: {}
+        }
+      }
+      initializeFlags()
+    }
+  } catch (error) {
+    console.error('Error loading modal data:', error)
+  } finally {
+    modalLoading.value = false
+  }
 }
 
 // Submit form (create or update)

@@ -16,7 +16,7 @@
     <!-- Filters -->
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
       <!-- Basic Filters Row -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
         <div>
           <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Search</label>
           <input
@@ -29,6 +29,17 @@
           />
         </div>
         <div>
+          <label for="type_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status Type</label>
+          <select
+            id="type_id"
+            v-model="filters.type_id"
+            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+          >
+            <option value="">All Types</option>
+            <option v-for="type in statusTypes" :key="type.id" :value="type.id">{{ type.name }}</option>
+          </select>
+        </div>
+        <div>
           <label for="status_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
           <select
             id="status_id"
@@ -36,7 +47,7 @@
             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
           >
             <option value="">All Statuses</option>
-            <option v-for="status in filterData.statuses" :key="status.id" :value="status.id">{{ status.name }}</option>
+            <option v-for="status in filteredStatuses" :key="status.id" :value="status.id">{{ status.name }}</option>
           </select>
         </div>
         <div>
@@ -694,7 +705,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import axios from 'axios'
 import { API_URL } from '../../config/api'
 import { getAuthHeaders } from '../../services/auth'
@@ -707,6 +718,7 @@ const toast = useToast()
 // State
 const subStatuses = ref([])
 const statuses = ref([])
+const statusTypes = ref([])
 const availableFlags = ref({
   status_flags: [],
   finance_flags: [],
@@ -749,6 +761,7 @@ const pagination = ref({
 // State for filters
 const filters = ref({
   search: '',
+  type_id: '',
   status_id: '',
   is_active: '',
   flag_type: '',
@@ -782,6 +795,42 @@ const bulkUpdateData = ref({
   ordering_id: null
 })
 
+// Fetch status types
+const fetchStatusTypes = async () => {
+  try {
+    const headers = await getAuthHeaders()
+    const response = await axios.get(`${API_URL}/status-types/get`, { headers })
+    
+    console.log('=== fetchStatusTypes response ===')
+    console.log('response.data:', response.data)
+    
+    if (response.data.status) {
+      statusTypes.value = response.data.data
+      console.log('statusTypes.value:', statusTypes.value)
+      
+      // Extract all statuses from status types and store them
+      const allStatuses = []
+      response.data.data.forEach(type => {
+        console.log(`Type ${type.id} (${type.name}):`, type.statuses?.length, 'statuses')
+        if (type.statuses && type.statuses.length > 0) {
+          allStatuses.push(...type.statuses)
+        }
+      })
+      
+      console.log('allStatuses extracted:', allStatuses.length, allStatuses)
+      
+      // Update filterData.statuses with statuses that have type_id
+      if (allStatuses.length > 0) {
+        filterData.value.statuses = allStatuses
+        statuses.value = allStatuses
+        console.log('filterData.value.statuses updated:', filterData.value.statuses.length)
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching status types:', error)
+  }
+}
+
 // Fetch sub statuses with pagination and filters
 const fetchSubStatuses = async () => {
   try {
@@ -791,6 +840,7 @@ const fetchSubStatuses = async () => {
     // Build query params
     const params = new URLSearchParams()
     if (filters.value.search) params.append('search', filters.value.search)
+    if (filters.value.type_id) params.append('type_id', filters.value.type_id)
     if (filters.value.status_id) params.append('status_id', filters.value.status_id)
     if (filters.value.is_active !== '') params.append('is_active', filters.value.is_active)
     
@@ -812,11 +862,18 @@ const fetchSubStatuses = async () => {
     if (response.data.success) {
       subStatuses.value = response.data.data
       
-      // Update filter data if available
+      // Update filter data if available, but preserve statuses from status-types
       if (response.data.filters) {
+        const preservedStatuses = filterData.value.statuses // Save statuses with type_id
         filterData.value = response.data.filters
-        // Update statuses for backward compatibility
-        statuses.value = response.data.filters.statuses || []
+        
+        // Restore statuses with type_id if they exist, otherwise use response statuses
+        if (preservedStatuses && preservedStatuses.length > 0) {
+          filterData.value.statuses = preservedStatuses
+          statuses.value = preservedStatuses
+        } else {
+          statuses.value = response.data.filters.statuses || []
+        }
       }
       
       // Update pagination
@@ -877,10 +934,43 @@ const resetFilters = () => {
   fetchSubStatuses()
 }
 
+// Computed property to filter statuses by selected type_id
+const filteredStatuses = computed(() => {
+  console.log('=== filteredStatuses computed ===')
+  console.log('filters.value.type_id:', filters.value.type_id)
+  console.log('filterData.value.statuses:', filterData.value.statuses)
+  
+  if (!filters.value.type_id) {
+    // If no type is selected, show all statuses
+    console.log('No type selected, returning all statuses:', filterData.value.statuses?.length)
+    return filterData.value.statuses || []
+  }
+  
+  // Filter statuses by type_id
+  const filtered = (filterData.value.statuses || []).filter(status => {
+    console.log(`Checking status ${status.id} (${status.name}): type_id=${status.type_id}, looking for=${filters.value.type_id}`)
+    return status.type_id === parseInt(filters.value.type_id)
+  })
+  
+  console.log('Filtered statuses:', filtered.length, filtered)
+  return filtered
+})
+
+// Watch type_id changes and clear status_id if it's not in the filtered list
+watch(() => filters.value.type_id, () => {
+  if (filters.value.type_id && filters.value.status_id) {
+    const statusExists = filteredStatuses.value.some(status => status.id === parseInt(filters.value.status_id))
+    if (!statusExists) {
+      filters.value.status_id = ''
+    }
+  }
+})
+
 // Computed property to check if any filters are active
 const hasActiveFilters = computed(() => {
   return !!(
     filters.value.search ||
+    filters.value.type_id ||
     filters.value.status_id ||
     filters.value.is_active ||
     filters.value.flag_type ||
@@ -1249,6 +1339,7 @@ const clearSelection = () => {
 
 // Fetch data on component mount
 onMounted(() => {
+  fetchStatusTypes()
   fetchSubStatuses()
 })
 </script>

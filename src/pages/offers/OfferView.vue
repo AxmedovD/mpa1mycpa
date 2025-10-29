@@ -273,7 +273,7 @@ const updateOffer = async (data) => {
 const updateOfferStatus = async (data) => {
   try {
     const headers = await getAuthHeaders()
-    const response = await axios.put(`${API_URL}/offers/offer/${data.id}/status/update`, {
+    const response = await axios.put(`${API_URL}/offers/${data.id}/status`, {
       status_id: data.status_id,
       type_id: data.type_id
     }, { headers })
